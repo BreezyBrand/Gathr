@@ -1,0 +1,58 @@
+﻿@model List<CrummyApp.Models.CardView>
+@{
+    string thisID;
+}
+@*Details*@
+@if (Model.Any())
+{
+    @foreach (var card in Model.OrderBy(n => n.name))
+    {
+        thisID = card.Id;
+
+        <div id="MatchDetails" class="container">
+            <div class="row">
+                <div class="col-3">
+                    <p><strong>Image</strong></p>
+                    <img />
+                </div>
+                <div class="col-9 container-fluid">
+                    <div class="row">
+                        <div class="col-3">
+                            <p><strong>Name:</strong> @card.name</p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>Type:</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>Rarity:</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>Note:</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>Alternate Name:</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>About or Over $5:</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>Last Pulled Cost:</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>Last Updated:</strong></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12" id="@card.Id">
+                    <partial name="_InventoryDetails" model="card.inventory" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-end">
+                    <button class="btn btn-warning" onclick='AddCard("@thisID")'>Add card</button>
+                </div>
+            </div>
+        </div>
+        <hr />
+    }
+}

@@ -1,0 +1,36 @@
+﻿@*Inventory**@
+@model List<CrummyApp.Models.InvOptions>
+
+
+<div class="container">
+    @if (Model.Any())
+    {
+        @*Locations*@        
+        <h4>You own @Model.Count() copies of this card.</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mark</th>
+                    <th>Location</th>
+                    <th>Confirmed</th>
+                    <th>Confirmed Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var inv in Model){
+                    <tr>
+                        <td>@inv.Mark</td>
+                        <td>@inv.Location</td>
+                        <td>@inv._confirmed</td>
+                        <td>@inv.confirmed_date</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+    else
+    {
+        <h4>You don't own any of this card!</h4>
+    }        
+</div>

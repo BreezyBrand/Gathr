@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="container">
+    <div id="SearchCard" class="row">
+        <div class="col-4">
+            <label class="form-label">Set</label>
+            <input onblur="runSearch()" class="form-control" id="searchSet" />
+        </div>
+        <div class="col-4">
+            <label class="form-label">Set Number</label>
+            <input onblur="runSearch()" class="form-control" id="searchNum" />
+        </div>
+        <div class="col-4">
+            <label class="form-label">Language</label>
+            <input onblur="runSearch()" class="form-control" id="searchLan" />
+        </div>
+        <button class="btn btn-success w-100" onclick="runSearch()">Search</button>
+    </div>
+</div>
+
+<div id="searchResults" class="container">
+    
+</div>
+
+<script>
+    function runSearch(){
+        const set_code = document.getElementById("searchSet").value;
+        const card_num = document.getElementById("searchNum").value;
+        const lang_code = document.getElementById("searchLan").value;
+        console.log("Searching...")
+
+        $.ajax({
+            url:"Cards/CardDetails?set_code="+set_code+"&card_num="+card_num+"&lang_code="+lang_code,
+            success: function(result){
+                document.getElementById("searchResults").innerHTML = result
+            },
+            error:function(result){
+                console.log(result)
+            }
+        })
+    }
+
+    function AddCard(id){        
+        console.log(id)
+
+        $.ajax({
+            url:"Cards/AddToInventory?card_id="+id,
+            success: function(result){
+                document.getElementById(id).innerHTML = result
+            },
+            error:function(result){
+                console.log(result)
+            }
+        })
+    }
+</script>
