@@ -55,7 +55,7 @@ namespace CrummyApp.Controllers
             }
 
             List<CardView> processedCards = new List<CardView>();
-            foreach (var card in cards.Take(20))
+            foreach (var card in cards.OrderBy(n => n.collector_number))
             {
                 CardView thisCard = new CardView(_context);
                 thisCard.processCardDetails(card);

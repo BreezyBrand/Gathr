@@ -13,5 +13,7 @@ namespace CrummyApp.Data
 
         public DbSet<Card> Cards { get; set; }
         public DbSet<InvOptions> Inventory { get; set; }
+        public DbSet<PriceOptions> Pricing { get; set; }
+        
     }
 }
