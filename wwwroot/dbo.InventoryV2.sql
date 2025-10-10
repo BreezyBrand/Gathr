@@ -10,6 +10,9 @@
 );
 
 
+DROP TABLE [dbo].[PriceHistory];
+DROP TABLE [dbo].[Legalities];
+
 CREATE TABLE [dbo].[PriceHistory] (
     [CardId]      VARCHAR (250) NOT NULL,
     [usd]         VARCHAR (10)  NULL,

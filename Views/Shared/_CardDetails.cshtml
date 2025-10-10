@@ -5,61 +5,58 @@
 @*Details*@
 @if (Model.Any())
 {
-    @foreach (var card in Model.OrderBy(n => n.SortOrder))
-    {
-        thisID = card.Id;
-
-        <div id="MatchDetails" class="container">
-            <div class="row">
-                <div class="col-3 text-center">
-                    <p><strong>Image</strong></p>
-                    @if (card.hasArt)
-                    {
-                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-50" src="@card.art["png"]"/>
-                    }
-                    <br />(@card.set.ToUpper():@card.collector_number)
-                </div>
-                <div class="col-9 container-fluid">
-                    <div class="row">
-                        <div class="col-3">
-                            <p><strong>Name:</strong> @card.name</p>
+    <div class="container-fluid">
+        <div class="row">
+            @foreach (var card in Model.OrderBy(n => n.SortOrder))
+            {
+                thisID = card.Id;
+                <div class="col-6 d-flex">
+                    <div id="MatchDetails" class="container">
+                        <div class="row">
+                            <div class="col-3 text-center">
+                                <p><strong>Image</strong></p>
+                                @if (card.hasArt)
+                                {
+                                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art["png"]" />
+                                }
+                                <br />(@card.set.ToUpper():@card.collector_number)
+                            </div>
+                            <div class="col-9 container-fluid">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p>
+                                            <strong>Name:</strong> @card.name<br />                                    
+                                            <strong>Type:</strong> @card.type_line<br />
+                                            <strong>Alternate Name:</strong> @card.alternate_name
+                                        </p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong>Rarity:</strong> @card.rarity</p>
+                                    </div>                                    
+                                    <div class="col-4">
+                                        <p>
+                                            <strong>Price:</strong>
+                                            @card.prices.GetDisplay("usd")
+                                        </p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong>Updated:</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="@card.Id">
+                                <partial name="_InventoryDetails" model="card.inventory" />
+                            </div>
                         </div>
-                        <div class="col-3">
-                            <p><strong>Type:</strong> @card.type_line</p>
-                        </div>
-                        <div class="col-3">
-                            <p><strong>Rarity:</strong> @card.rarity</p>
-                        </div>                        
-                        <div class="col-3">
-                            <p><strong>Alternate Name:</strong> @card.alternate_name</p>
-                        </div>
-                        <div class="col-3">
-                            <p>
-                                <strong>About or Over $5:</strong>
-                                @card.prices.IsExpensive("")
-                            </p>
-                        </div>
-                        <div class="col-3">
-                            <p>
-                                <strong>Last Pulled Cost:</strong>
-                                @card.prices.GetDisplay("usd")
-                            </p>
-                        </div>
-                        <div class="col-3">
-                            <p><strong>Last Updated:</strong></p>
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <button class="btn btn-warning" onclick='AddCard("@thisID")'>Add card</button>
+                            </div>
                         </div>
                     </div>
+                    <hr />
                 </div>
-                <div class="col-12" id="@card.Id">
-                    <partial name="_InventoryDetails" model="card.inventory" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 text-end">
-                    <button class="btn btn-warning" onclick='AddCard("@thisID")'>Add card</button>
-                </div>
-            </div>
+            }
         </div>
-        <hr />
-    }
+    </div>
 }

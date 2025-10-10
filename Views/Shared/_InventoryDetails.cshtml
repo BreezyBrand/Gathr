@@ -7,22 +7,48 @@
     {
         @*Locations*@        
         <h4>You own @Model.Count() copies of this card.</h4>
-        <table>
-            <thead>
+        <table class="table">
+            <thead class="text-center">
                 <tr>
+                    <th>Inventory ID</th>
                     <th>Mark</th>
                     <th>Location</th>
                     <th>Confirmed</th>
                     <th>Confirmed Date</th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach(var inv in Model){
-                    <tr>
-                        <td>@inv.Mark</td>
-                        <td>@inv.Location</td>
-                        <td>@inv._confirmed</td>
-                        <td>@inv.confirmed_date</td>
+                @foreach (var inv in Model)
+                {
+                    string mark_id = inv.Card_Id + "_mark";
+                    string loc_id = inv.Card_Id + "_loc";
+                    string conf_id = inv.Card_Id + "_conf";
+                    string row_id = inv.Card_Id + "_row";
+
+                    <tr id="@row_id">
+                        <td>
+                            <span id="@inv.Id">@inv.Id</span>
+                        </td>
+                        <td>
+                            <input class="form-control" id="@mark_id" value="@inv.Mark" />
+                        </td>
+                        <td>
+                            <input class="form-control" id="@loc_id" value="@inv.Location" />
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check" id="@conf_id" value="@inv._confirmed" />
+                        </td>
+                        <td>
+                            @inv.confirmed_date
+                        </td>
+                        <td>
+                            <button value="submit" class="btn btn-success" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">Update</button>                            
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">Delete</button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -32,5 +58,5 @@
     else
     {
         <h4>You don't own any of this card!</h4>
-    }        
+    }
 </div>

@@ -1,0 +1,38 @@
+﻿@model List<CardView>
+
+@*Locations*@        
+<div class="container-fluid">
+    <div class="row">
+        @foreach (var card in Model.OrderBy(x => x.SortOrder))
+        {
+            <div class="col-2 card">
+                <div class="card-header">
+                    <p>
+                        @if (card.alternate_name.Equals(""))
+                        {
+                            <strong>@card.name</strong>
+                            <br />
+                        }
+                        else
+                        {
+                            <strong>@card.alternate_name</strong>
+                            <br />
+                            <span>(@card.name)</span>
+                            <br />
+                        }
+                        <span>(@card.set.ToUpper():@card.collector_number)</span>
+                    </p>
+                </div>
+                <div class="card-body">
+                    @if (card.hasArt)
+                    {
+                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art["png"]" />
+                    }
+                    <br />(@card.set.ToUpper():@card.collector_number)
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        }
+    </div>
+</div>

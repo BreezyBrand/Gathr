@@ -1,4 +1,13 @@
-﻿UPDATE
+﻿INSERT INTO 
+	PriceHistory(CardId) 
+Select 
+	id 
+FROM Cards c
+	LEFT JOIN PriceHistory ph ON ph.CardId = c.id
+WHERE 
+	ph.CardId IS NULL
+
+UPDATE
 	PriceHistory
 SET	
 	usd = (SELECT TOP 1 JSON_VALUE(REPLACE(REPLACE(c.prices,CHAR(39),'"'),'None','"N/A"'),'$.usd') WHERE c.Id = CardId),
