@@ -1,17 +1,19 @@
-﻿CREATE TABLE [dbo].[InventoryV2] (
-    [Id]             INT            IDENTITY (1, 1) NOT NULL,
-	[Card_Id]        VARCHAR (250)  NULL,
+﻿DROP TABLE [dbo].[PriceHistory];
+DROP TABLE [dbo].[Legalities];
+DROP TABLE [dbo].[InventoryV2];
+DROP TABLE [Images].[InventoryV2]
+
+CREATE TABLE [dbo].[InventoryV2] (
+    [Id]             INT           IDENTITY (1, 1) NOT NULL,
+    [Card_Id]        VARCHAR (250) NULL,
     [Mark]           VARCHAR (10)  NULL,
     [Location]       VARCHAR (100) NULL,
-    [Confirmed]      INT            NULL,
-    [Confirmed_date] DATETIME2 (7)  NULL,
-    PRIMARY KEY CLUSTERED ([Id] ASC), 
-    CONSTRAINT [FK_InventoryV2_ToCards] FOREIGN KEY ([Card_Id]) REFERENCES [Cards]([Id])
+    [Confirmed]      INT           NULL,
+    [Confirmed_date] DATETIME2 (7) NULL,
+	[Language]		 VARCHAR (100) NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_InventoryV2_ToCards] FOREIGN KEY ([Card_Id]) REFERENCES [dbo].[Cards] ([id])
 );
-
-
-DROP TABLE [dbo].[PriceHistory];
-DROP TABLE [dbo].[Legalities];
 
 CREATE TABLE [dbo].[PriceHistory] (
     [CardId]      VARCHAR (250) NOT NULL,
@@ -51,5 +53,27 @@ CREATE TABLE [dbo].[Legalities] (
     [predh]           VARCHAR (50)  NULL,
     [Update_Date]     DATETIME2 (7) NULL
 );
+
+CREATE TABLE [dbo].[TransactionLog] (
+    [Id]              INT           IDENTITY (1, 1) NOT NULL,
+    [InventoryId]     INT NOT NULL,
+    [Card_Id]         VARCHAR (250) NULL,
+    [UpdateType]      VARCHAR(100) NULL,
+    [TransactionDate] DATETIME2(7) NULL,
+    [Description]     VARCHAR(MAX) NULL    
+    PRIMARY KEY CLUSTERED ([Id] ASC),    
+);
+
+CREATE TABLE [dbo].[Images] (
+    [Id]          VARCHAR (250) NOT NULL,
+    [small]       VARCHAR (250) NULL,
+    [normal]      VARCHAR (250) NULL,
+    [large]       VARCHAR (250) NULL,
+    [png]         VARCHAR (250) NULL,
+    [art_crop]    VARCHAR (250) NULL,
+    [border_crop] VARCHAR (250) NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+);
+
 
 

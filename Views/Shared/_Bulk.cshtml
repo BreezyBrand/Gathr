@@ -1,13 +1,20 @@
 ﻿@model List<CardView>
+@inject IConfiguration config;
 
+@{
+    string thisID;
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
+}
 @*Locations*@        
 <div class="container-fluid">
-    <div class="row">
-        @foreach (var card in Model.OrderBy(x => x.SortOrder))
+    <div class="row g-0">
+        @foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
         {
-            <div class="col-2 card">
-                <div class="card-header">
-                    <p>
+            thisID = card.Id;
+
+            <div class="col-2 card mt-2">
+                <div class="card-header d-flex justify-content-center align-items-center">
+                    <p class="small text-center align-middle flex-fill m-0 p-0">
                         @if (card.alternate_name.Equals(""))
                         {
                             <strong>@card.name</strong>
@@ -24,13 +31,42 @@
                     </p>
                 </div>
                 <div class="card-body">
-                    @if (card.hasArt)
+                    @if (card.hasArt && showArt)
                     {
                         <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art["png"]" />
                     }
-                    <br />(@card.set.ToUpper():@card.collector_number)
+                    else
+                    {
+                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="~/imgback.jpg" />
+                    }                    
                 </div>
-                <div class="card-footer">
+                <div class="card-footer container-fluid">
+                    <div class="row">
+                        @if (!card.prices.usd_etched.Equals("N/A"))
+                        {
+                            <div class="col-4">
+                                <label class="small form-label fw-bold text-center">None</label>
+                                <input type="number" class="form-control" id="nomark_@thisID" />
+                            </div>
+                            <div class="col-4">
+                                <label class="small form-label fw-bold text-center">Foil</label>
+                                <input type="number" class="form-control" id="foil_@thisID" />
+                            </div>
+                            <div class="col-4">
+                                <label class="small form-label fw-bold text-center">Etched</label>
+                                <input type="number" class="form-control" id="etched_@thisID" />
+                            </div>
+                        } else {
+                            <div class="col-6">
+                                <label class="small form-label fw-bold text-center">None</label>
+                                <input type="number" class="form-control" id="nomark_@thisID" />
+                            </div>
+                            <div class="col-6">
+                                <label class="small form-label fw-bold text-center">Foil</label>
+                                <input type="number" class="form-control" id="foil_@thisID" />
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         }

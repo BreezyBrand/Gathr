@@ -1,13 +1,16 @@
-﻿@model List<CrummyApp.Models.CardView>
+﻿@model List<CardView>
+@inject IConfiguration config;
+
 @{
     string thisID;
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
 }
 @*Details*@
 @if (Model.Any())
 {
     <div class="container-fluid">
         <div class="row">
-            @foreach (var card in Model.OrderBy(n => n.SortOrder))
+            @foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
             {
                 thisID = card.Id;
                 <div class="col-6 d-flex">
@@ -15,9 +18,13 @@
                         <div class="row">
                             <div class="col-3 text-center">
                                 <p><strong>Image</strong></p>
-                                @if (card.hasArt)
+                                @if (card.hasArt && showArt)
                                 {
                                     <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art["png"]" />
+                                }
+                                else
+                                {
+                                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="~/imgback.jpg" />
                                 }
                                 <br />(@card.set.ToUpper():@card.collector_number)
                             </div>
@@ -25,14 +32,14 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <p>
-                                            <strong>Name:</strong> @card.name<br />                                    
+                                            <strong>Name:</strong> @card.name<br />
                                             <strong>Type:</strong> @card.type_line<br />
                                             <strong>Alternate Name:</strong> @card.alternate_name
                                         </p>
                                     </div>
                                     <div class="col-4">
                                         <p><strong>Rarity:</strong> @card.rarity</p>
-                                    </div>                                    
+                                    </div>
                                     <div class="col-4">
                                         <p>
                                             <strong>Price:</strong>
@@ -47,8 +54,6 @@
                             <div class="col-12" id="@card.Id">
                                 <partial name="_InventoryDetails" model="card.inventory" />
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-12 text-end">
                                 <button class="btn btn-warning" onclick='AddCard("@thisID")'>Add card</button>
                             </div>

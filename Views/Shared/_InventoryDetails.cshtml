@@ -2,33 +2,34 @@
 @model List<CrummyApp.Models.InvOptions>
 
 
-<div class="container">
+<div class="container-fluid m-0">
     @if (Model.Any())
     {
         @*Locations*@        
         <h4>You own @Model.Count() copies of this card.</h4>
-        <table class="table">
+        <table class="table small">
             <thead class="text-center">
                 <tr>
-                    <th>Inventory ID</th>
+                    <th class="collapse">Inventory ID</th>
                     <th>Mark</th>
                     <th>Location</th>
+                    <th>Language</th>
                     <th>Confirmed</th>
-                    <th>Confirmed Date</th>
-                    <th></th>
+                    <th>Date</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var inv in Model)
                 {
-                    string mark_id = inv.Card_Id + "_mark";
-                    string loc_id = inv.Card_Id + "_loc";
-                    string conf_id = inv.Card_Id + "_conf";
-                    string row_id = inv.Card_Id + "_row";
+                    string mark_id = inv.Id + "_mark";
+                    string loc_id = inv.Id + "_loc";
+                    string conf_id = inv.Id + "_conf";
+                    string row_id = inv.Id + "_row";
+                    string lan_id = inv.Id + "_lan";
 
                     <tr id="@row_id">
-                        <td>
+                        <td class="collapse">
                             <span id="@inv.Id">@inv.Id</span>
                         </td>
                         <td>
@@ -37,17 +38,23 @@
                         <td>
                             <input class="form-control" id="@loc_id" value="@inv.Location" />
                         </td>
+                        <td>
+                            <input class="form-control" id="@lan_id" value="@inv.Language" />
+                        </td>
                         <td class="text-center">
-                            <input type="checkbox" class="form-check" id="@conf_id" value="@inv._confirmed" />
+                            @if (inv._confirmed)
+                            {
+                                <input type="checkbox" class="form-check" id="@conf_id" value="@inv._confirmed" checked/>
+                            } else {
+                                <input type="checkbox" class="form-check" id="@conf_id" value="@inv._confirmed" />
+                            }
                         </td>
                         <td>
                             @inv.confirmed_date
                         </td>
-                        <td>
-                            <button value="submit" class="btn btn-success" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">Update</button>                            
-                        </td>
-                        <td>
-                            <button class="btn btn-danger" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">Delete</button>
+                        <td class="text-center">
+                            <button class="btn btn-success w-100" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">Update</button>                                                    
+                            <button class="btn btn-danger w-100" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">Delete</button>
                         </td>
                     </tr>
                 }
