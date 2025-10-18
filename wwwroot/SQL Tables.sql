@@ -1,7 +1,8 @@
 ﻿DROP TABLE [dbo].[PriceHistory];
 DROP TABLE [dbo].[Legalities];
 DROP TABLE [dbo].[InventoryV2];
-DROP TABLE [Images].[InventoryV2]
+DROP TABLE [dbo].[TransactionLog]
+DROP TABLE [dbo].[Images]
 
 CREATE TABLE [dbo].[InventoryV2] (
     [Id]             INT           IDENTITY (1, 1) NOT NULL,
