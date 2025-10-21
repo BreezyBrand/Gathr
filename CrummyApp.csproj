@@ -13,7 +13,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>    
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />    
   </ItemGroup>
 
 </Project>

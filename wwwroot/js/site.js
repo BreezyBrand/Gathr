@@ -18,6 +18,7 @@ function runSearch() {
             url: "Cards/CardDetails?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,
             success: function (result) {
                 document.getElementById("searchResults").innerHTML = result
+                toggleInventory()
             },
             error: function (result) {
                 console.log(result)
@@ -29,6 +30,7 @@ function runSearch() {
             success: function (result) {
                 document.getElementById("searchResults").innerHTML = result;
                 reformatCardHeads();
+                toggleInventory()
             },
             error: function (result) {
                 console.log(result)
@@ -47,6 +49,7 @@ function searchEZ(cards) {
         data: { raw_cards: JSON.stringify(cards)},
         success: function (result) {
             document.getElementById("searchResults").innerHTML = result
+            toggleInventory()
         },
         error: function (result) {
             console.log(result)
@@ -58,6 +61,34 @@ function toggleSearch(toggleType) {
     document.getElementById("toggleType").value = toggleType;
 }
 
+function toggleMassEntry() {
+    var massEntry = document.getElementById("MassEntry");
+    massEntry.classList.toggle("collapse")
+}
+
+function toggleInventory() {
+    var invCheck = document.getElementById("toggleInv").checked
+    var all_Results = document.getElementsByClassName("invCard")
+    console.log("Toggle for Inventory set to " + invCheck + ".")
+    console.log("Located  " + all_Results.length + " cards in search.")
+    if (invCheck) {
+        for (i = 0; i < all_Results.length; i++) {
+            var thisEle = all_Results[i]
+            if (thisEle.classList.contains("InInventory")) {
+                console.log("Card " + i + " in inventory")
+                thisEle.classList.remove("collapse")                
+            } else {
+                console.log("Card " + i + " not in inventory")
+                thisEle.classList.add("collapse")                
+            }            
+        }
+    } else {
+        for (i = 0; i < all_Results.length; i++) {
+            var thisEle = all_Results[i]
+            thisEle.classList.remove("collapse")
+        }
+    }
+}
 function AddCard(id) {
     console.log(id)
 
@@ -77,8 +108,7 @@ function UpdateInventory(id, cardid) {
     mark = document.getElementById(id + "_mark").value;
     loc = document.getElementById(id + "_loc").value;
     conf = document.getElementById(id + "_conf").checked;    
-    lan = document.getElementById(id + "_lan").value;
-    row_id = 
+    lan = document.getElementById(id + "_lan").value;    
 
     $.ajax({
         url: "Cards/UpdateInventory",        
@@ -101,17 +131,31 @@ function UpdateInventory(id, cardid) {
 }
 
 function DeleteInventory(id, cardid) {
-    console.log("Deleting card " + cardid)
+    console.log("Deleting card " + id)
 
-    //$.ajax({
-    //    url: "Cards/Delete?card_id=" + id,
-    //    success: function (result) {
-    //        document.getElementById(cardid).innerHTML = result
-    //    },
-    //    error: function (result) {
-    //        console.log(result)
-    //    }
-    //})
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;    
+    lan = document.getElementById(id + "_lan").value;    
+
+    $.ajax({
+        url: "Cards/DeleteFromInventory",        
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id:id,
+            Language:lan,
+            Location:loc,
+            Mark:mark,
+            _confirmed:conf
+        },
+        success: function (result) {
+            document.getElementById(cardid).innerHTML = result
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
 }
 
 //Text Parsing

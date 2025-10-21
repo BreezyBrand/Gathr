@@ -1,4 +1,5 @@
 using CrummyApp.Data;
+using CrummyApp.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

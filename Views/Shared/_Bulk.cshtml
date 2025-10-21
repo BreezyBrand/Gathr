@@ -4,6 +4,8 @@
 @{
     string thisID;
     bool showArt = config.GetSection("ShowArt").Get<bool>();
+    bool inInv;
+    string invClass;
 }
 @*Locations*@        
 <div class="container-fluid">
@@ -11,8 +13,10 @@
         @foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
         {
             thisID = card.Id;
+            inInv = card.inventory.Any();
+            invClass = inInv ? "InInventory" : "";
 
-            <div class="col-2 card mt-2">
+            <div class="col-2 card @invClass mt-2 invCard">
                 <div class="card-header d-flex justify-content-center align-items-center">
                     <p class="small text-center align-middle flex-fill m-0 p-0">
                         @if (card.alternate_name.Equals(""))
@@ -33,7 +37,7 @@
                 <div class="card-body">
                     @if (card.hasArt && showArt)
                     {
-                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art["png"]" />
+                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art.png" />
                     }
                     else
                     {

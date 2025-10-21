@@ -6,30 +6,34 @@
             </p>
         </div>
         <div class="col-6">
-            <a href="#">Advanced Settings</a>
+            <button class="btn btn-secondary" onclick="toggleMassEntry()">Advanced Settings</button>
         </div>
     </div>
     <div class="row" id="basicSearch">
         <input class="form-control collapse" id="toggleType" value="database" />
         <div class="col-4">
-            <label class="form-label">Set</label>
+            <label class="form-label fw-bold">Set</label>
             <input onblur="runSearch()" class="form-control" id="searchSet" />
         </div>
         <div class="col-4">
-            <label class="form-label">Set Number</label>
+            <label class="form-label fw-bold">Set Number</label>
             <input onblur="runSearch()" class="form-control" id="searchNum" />
         </div>
         <div class="col-4">
-            <label class="form-label">Language</label>
+            <label class="form-label fw-bold">Language</label>
             <input onblur="runSearch()" class="form-control" id="searchLan" />
         </div>
+        <div class="col-4">
+            <label class="form-label fw-bold">Inventory Toggle</label>
+            <input type="checkbox" onclick="toggleInventory()" class="form-check" id="toggleInv" />
+        </div>
     </div>
-    <div class="row" id="bulkSearch">
+    <div class="row collapse" id="MassEntry">
         <input class="form-control collapse" id="toggleType" value="database" />
         <div class="col-4">
-            <label class="form-label">Bulk Search</label>
+            <label class="form-label fw-bold">Mass Entry</label>
             <p class="small">Use the SET:NUM format. Please separate cards with a new line.</p>
-            <textarea onblur="parseBulkSearch()" class="form-control" id="bulkEntry"></textarea>
+            <textarea onblur="parseBulkSearch()" class="form-control w-100" id="bulkEntry"></textarea>
         </div>        
     </div>
 </div>

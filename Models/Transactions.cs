@@ -1,9 +1,12 @@
-﻿namespace CrummyApp.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CrummyApp.Models
 {
-    public class Transactions
+    [Table("TransactionLog")]
+    public class Transaction
     {
         public int Id { get; set; }
-        public int Card_Id { get; set; }
+        public string Card_Id { get; set; }
         public int InventoryId { get; set; }        
         public string UpdateType { get; set; }
         public DateTime TransactionDate { get; set; }

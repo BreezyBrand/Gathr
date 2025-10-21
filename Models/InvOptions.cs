@@ -16,7 +16,7 @@ namespace CrummyApp.Models
         [Column("Confirmed")]
         public bool _confirmed { get; set; }
         public DateTime confirmed_date { get; set; }        
-    }
+    }    
     [Table("PriceHistory")]
     public class PriceOptions
     {

@@ -41,7 +41,7 @@ namespace CrummyApp.Models
         //Price Variable
         public PriceOptions prices { get; set; }
         //Art Variables
-        public JsonNode art { get; set; }
+        public CardImages art { get; set; }
         public bool hasArt { get; set; }
         //Inventory Specific
         public int in_inventory { get; set; }
@@ -63,22 +63,12 @@ namespace CrummyApp.Models
             this.hasArt = false;
 
             this.prices = _context.Pricing.Find(card.Id);
-
-            var image_holder = card.image_uris.Replace('\'', '"').Replace("None", "\"\"");
-            if (!card.image_uris.IsNullOrEmpty())
+            this.art = _context.Images.Find(card.Id);
+            if (!this.art.Equals(null))
             {
-                this.art = JsonNode.Parse(image_holder);
-                try
-                {
-                    var img_to_use = this.art["png"];
-                    this.hasArt = true;
-                    img_to_use = img_to_use;
-                }
-                catch (Exception e)
-                {
-                }
+                this.hasArt = true;
             }
-
+            
             this.inventory = _context.Inventory.Where(x => x.Card_Id.Equals(card.Id)).ToList();
         }
     }
@@ -90,6 +80,7 @@ namespace CrummyApp.Models
     [Table("Images")]
     public class CardImages
     {
+        [Key]
         public string Id { get; set; }
         public string small {  get; set; }
         public string normal {  get; set; }
