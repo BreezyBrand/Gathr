@@ -6,7 +6,7 @@
     @if (Model.Any())
     {
         @*Locations*@        
-        <h4>You own @Model.Count() copies of this card.</h4>
+        <p class="fw-bold fst-italic text-center">You own @Model.Count() copies of this card.</p>
         <table class="table small">
             <thead class="text-center">
                 <tr>
@@ -15,8 +15,8 @@
                     <th>Location</th>
                     <th>Language</th>
                     <th>Confirmed</th>
-                    <th>Date</th>
-                    <th></th>
+                    <th class="collapse">Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,12 +49,16 @@
                                 <input type="checkbox" class="form-check" id="@conf_id" value="@inv._confirmed" />
                             }
                         </td>
-                        <td>
+                        <td class="collapse">
                             @inv.confirmed_date
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-success w-100" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">Update</button>                                                    
-                            <button class="btn btn-danger w-100" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">Delete</button>
+                            <button class="btn btn-success w-100" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">
+                                <i class="bi bi-save"></i>
+                            </button>
+                            <button class="btn btn-danger w-100" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </td>
                     </tr>
                 }
@@ -64,6 +68,6 @@
     }
     else
     {
-        <h4>You don't own any of this card!</h4>
+        <p class="fw-bold fst-italic text-center">You don't own any of this card!</p>
     }
 </div>

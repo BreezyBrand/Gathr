@@ -38,4 +38,3 @@ FROM
 	JOIN Legalities l ON c.id = l.CardId
 
 SELECT * FROM Legalities
-SELECT TOP 10 legalities from Cards

@@ -90,5 +90,24 @@ namespace CrummyApp.Controllers
             thisCard.processCardDetails(card);
             return PartialView("_InventoryDetails", thisCard.inventory);
         }
+
+        public PartialViewResult DeleteFromInventory(string inv_id)
+        {
+            //Find inventory card
+            InvOptions inv = _context.Inventory.Find(inv_id);
+            Card card = _context.Cards.Find(inv.Card_Id);
+            if(inv == null)
+            {
+                throw new InvalidOperationException("No matching Inventory Id");
+            }
+            
+            _context.Inventory.Remove(inv);
+            _context.SaveChanges();
+
+            //Reset view
+            CardView thisCard = new CardView(_context);
+            thisCard.processCardDetails(card);
+            return PartialView("_InventoryDetails", thisCard.inventory);
+        }
     }
 }
