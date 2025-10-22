@@ -65,16 +65,22 @@ namespace CrummyApp.Controllers
         //GET Endpoints
         public PartialViewResult CardDetails(string? set_code, string lang_code = "EN", string card_num = "")
         {
-            List<Card> cards = searchCards(set_code,lang_code,card_num);            
+            List<Card> cards = searchCards(set_code, lang_code, card_num);
             List<CardView> processedCards = processCards(cards);
             return PartialView("_CardDetails", processedCards.ToList());
         }
         public PartialViewResult GetBulk(string? set_code, string lang_code = "EN", string card_num = "")
-        {            
-            List<Card> cards = searchCards(set_code,lang_code,card_num);
+        {
+            List<Card> cards = searchCards(set_code, lang_code, card_num);
             List<CardView> processedCards = processCards(cards);
             return PartialView("_Bulk", processedCards.ToList());
-        }        
+        }
+        public PartialViewResult GetInventory(string? set_code, string lang_code = "EN", string card_num = "")
+        {
+            List<Card> cards = searchCards(set_code, lang_code, card_num);
+            List<CardView> processedCards = processCards(cards);
+            return PartialView("_Inventory", processedCards.ToList());
+        }
         public PartialViewResult EZSearch(string raw_cards)
         {
             dynamic raw_cards_list = JsonConvert.DeserializeObject(raw_cards);
@@ -90,12 +96,12 @@ namespace CrummyApp.Controllers
             }
 
             List<Card> cards = new List<Card>();
-            foreach(var ezCard in ezCards)
+            foreach (var ezCard in ezCards)
             {
-                if(!ezCard.SetCode.IsNullOrEmpty() && !ezCard.CardNum.IsNullOrEmpty())
+                if (!ezCard.SetCode.IsNullOrEmpty() && !ezCard.CardNum.IsNullOrEmpty())
                 {
                     cards.AddRange(
-                            _context.Cards.Where(x=> 
+                            _context.Cards.Where(x =>
                                 x.set.Equals(ezCard.SetCode)
                                 && x.collector_number.Equals(ezCard.CardNum)
                             ).ToList()
@@ -106,13 +112,30 @@ namespace CrummyApp.Controllers
             List<CardView> processedCards = processCards(cards);
             return PartialView("_CardDetails", processedCards);
         }
-        
+        public PartialViewResult TransactionLog(string? set_code, string lang_code = "EN", string card_num = "")
+        {
+            List<Transaction> log;
+            if (!set_code.IsNullOrEmpty() || !card_num.IsNullOrEmpty())
+            {
+                List<Card> cards = searchCards(set_code, lang_code, card_num);
+                List<string> cardIDs = cards.Select(n => n.Id).ToList();
+                log = _context.Transactions.Where(x => cardIDs.Contains(x.Card_Id)).ToList();
+            }
+            else
+            {
+                log = _context.Transactions.ToList();
+            }
+
+            return PartialView("_Transactions", log.OrderByDescending(n => n.TransactionDate).ToList());
+        }
+
+
         //POST Endpoints
         public PartialViewResult AddToInventory(string card_id)
         {
             //Find card
             Card card = _context.Cards.Find(card_id);
-            if(card == null)
+            if (card == null)
             {
                 throw new InvalidOperationException("No matching Card Id");
             }
@@ -129,7 +152,7 @@ namespace CrummyApp.Controllers
             _context.Inventory.Add(new_opts);
             _context.SaveChanges();
 
-            TransactionUpdate_Inventory(new_opts, "Added new copy of "+card.name+" ("+card.Id+")");
+            TransactionUpdate_Inventory(new_opts, "Added new copy of " + card.name + " (" + card.Id + ")", "Create");
 
             //Reset view
             CardView thisCard = new CardView(_context);
@@ -142,13 +165,13 @@ namespace CrummyApp.Controllers
             Card card = _context.Cards.Find(inv.Card_Id);
             InvOptions old = _context.Inventory.Find(inv.Id);
 
-            if(card == null)
+            if (card == null)
             {
                 throw new InvalidOperationException("No matching Card Id");
             }
             //Add found card to inventory, provide base options                        
             string updateNote = CompareInventory(old, inv);
-            
+
             old.Mark = inv.Mark;
             old.confirmed_date = DateTime.Now;
             old._confirmed = inv._confirmed;
@@ -158,7 +181,7 @@ namespace CrummyApp.Controllers
             _context.Inventory.Update(old);
             _context.SaveChanges();
 
-            TransactionUpdate_Inventory(inv, updateNote);
+            TransactionUpdate_Inventory(inv, updateNote, "Update");
 
             //Reset view
             CardView thisCard = new CardView(_context);
@@ -169,14 +192,14 @@ namespace CrummyApp.Controllers
         {
             //Find card
             Card card = _context.Cards.Find(inv.Card_Id);
-            if(card == null)
+            if (card == null)
             {
                 throw new InvalidOperationException("No matching Card Id");
             }
             //Add found card to inventory, provide base options            
             _context.Inventory.Remove(inv);
             string updateNote = "Deleted Inventory ID# " + inv.Id.ToString() + " from inventory";
-            TransactionUpdate_Inventory(inv, updateNote);
+            TransactionUpdate_Inventory(inv, updateNote, "Delete");
             _context.SaveChanges();
 
             //Reset view
@@ -186,7 +209,7 @@ namespace CrummyApp.Controllers
         }
 
         //Tracking Details
-        private string CompareInventory(InvOptions old,tempInv inv)
+        private string CompareInventory(InvOptions old, tempInv inv)
         {
             string running_note = "";
 
@@ -195,39 +218,44 @@ namespace CrummyApp.Controllers
                 return "No changes. Updating confirmed date.";
             }
 
-            if (!old.Location.Equals(inv.Location)) {
+            if (!old.Location.Equals(inv.Location))
+            {
                 running_note += "Location changed from '" + old.Location + "' to '" + inv.Location + "'. ";
             }
 
-            if (!old.Language.Equals(inv.Language)) {
+            if (!old.Language.Equals(inv.Language))
+            {
                 running_note += "Language changed from '" + old.Language + "' to '" + inv.Language + "'. ";
             }
 
-            if (!old.Mark.Equals(inv.Mark)) {
+            if (!old.Mark.Equals(inv.Mark))
+            {
                 running_note += "Mark changed from '" + old.Mark + "' to '" + inv.Mark + "'. ";
             }
 
-            if (!old._confirmed.Equals(inv._confirmed)) {
+            if (!old._confirmed.Equals(inv._confirmed))
+            {
                 running_note += "Card confirmation changed from '" + old._confirmed + "' to '" + inv._confirmed + "'.";
             }
 
             return running_note.Trim();
         }
-        private void TransactionUpdate_Card(Card card, string updateNote)
+        private void TransactionUpdate_Card(Card card, string updateNote, string uType)
         {
             Transaction action = new Transaction()
             {
                 Card_Id = card.Id,
                 Description = updateNote,
                 TransactionDate = DateTime.Now,
-                UpdateType = "Card Update"
+                TransactionUser = Environment.MachineName,
+                UpdateType = uType
             };
             _context.Transactions.Add(action);
             _context.SaveChanges();
 
             return;
-        } 
-        private void TransactionUpdate_Inventory(InvOptions invOptions, string updateNote)
+        }
+        private void TransactionUpdate_Inventory(InvOptions invOptions, string updateNote, string uType)
         {
             Transaction action = new Transaction()
             {
@@ -235,11 +263,12 @@ namespace CrummyApp.Controllers
                 InventoryId = invOptions.Id,
                 Description = updateNote,
                 TransactionDate = DateTime.Now,
-                UpdateType = "Inventory"
+                TransactionUser = Environment.MachineName,
+                UpdateType = uType
             };
             _context.Transactions.Add(action);
             _context.SaveChanges();
-            
+
             return;
         }
 

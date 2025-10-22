@@ -1,0 +1,45 @@
+﻿@model List<Transaction>
+
+<div class="container-fluid">
+    @foreach (Transaction transaction in Model.Take(50))
+    {
+        <div class="row">
+            <div class="col-1 text-center" style="border-right:1pt solid gray">
+                @if(transaction.UpdateType.Equals("Create")){
+                    <p class="text-success" style="font-size:50pt">
+                        <i class="bi bi-file-plus"></i>
+                    </p>
+                }
+                else if (transaction.UpdateType.Equals("Update")){
+                    <p class="text-primary" style="font-size:50pt">
+                        <i class="bi bi-floppy"></i>
+                    </p>
+                }
+                else if (transaction.UpdateType.Equals("Delete")){
+                    <p class="text-danger" style="font-size:50pt">
+                        <i class="bi bi-trash"></i>
+                    </p>
+                }
+                else if (transaction.UpdateType.Equals("Sold"))
+                {
+                    <p class="text-success" style="font-size:50pt">
+                        <i class="bi bi-cash"></i>
+                    </p>
+                }
+                else {
+                    <p>action-img-alt</p>
+                }
+            </div>
+            <div class="col-11">
+                <p>
+                    <span class="fst-italic small">@transaction.TransactionUser</span>
+                    <br />
+                    @transaction.Description                    
+                    <br />
+                    <span class="fst-italic small">@transaction.TransactionDate</span>
+                </p>
+            </div>
+        </div>
+        <hr />
+    }
+</div>

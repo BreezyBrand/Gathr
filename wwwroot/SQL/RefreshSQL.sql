@@ -59,13 +59,16 @@ CREATE TABLE [dbo].[Legalities] (
 
 CREATE TABLE [dbo].[TransactionLog] (
     [Id]              INT           IDENTITY (1, 1) NOT NULL,
-    [InventoryId]     INT NOT NULL,
+    [InventoryId]     INT           NOT NULL,
     [Card_Id]         VARCHAR (250) NULL,
-    [UpdateType]      VARCHAR(100) NULL,
-    [TransactionDate] DATETIME2(7) NULL,
-    [Description]     VARCHAR(MAX) NULL    
-    PRIMARY KEY CLUSTERED ([Id] ASC),    
+    [UpdateType]      VARCHAR (100) NULL,
+    [TransactionDate] DATETIME2 (7) NULL,
+	[TransactionUser] VARCHAR (100) NULL,
+    [Description]     VARCHAR (MAX) NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+
+
 
 CREATE TABLE [dbo].[Images] (
     [Id]          VARCHAR (250) NOT NULL,

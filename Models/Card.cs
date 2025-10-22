@@ -44,7 +44,7 @@ namespace CrummyApp.Models
         public CardImages art { get; set; }
         public bool hasArt { get; set; }
         //Inventory Specific
-        public int in_inventory { get; set; }
+        public bool in_inventory { get; set; }
         public List<InvOptions> inventory { get; set; }
         public void processCardDetails(Card card)
         {
@@ -67,6 +67,7 @@ namespace CrummyApp.Models
             this.hasArt = true;
             
             this.inventory = _context.Inventory.Where(x => x.Card_Id.Equals(card.Id)).ToList();
+            this.in_inventory = this.inventory.Any();
         }
     }
     public class EzCard

@@ -1,0 +1,117 @@
+﻿@model List<CardView>
+@inject IConfiguration config;
+
+@{
+    string thisID;
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
+    bool inInv;
+    string invClass;
+}
+@*Locations*@        
+<div class="container-fluid">
+    <table class="table table-sm" id="InvTable">
+        <thead class="bg-dark text-white text-center">
+            <tr>
+                <th>
+                    Image
+                </th>
+                <th class="sortHeader" onclick="SortTable('Name')">
+                    Name
+                    <span id="sortName"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('Set')">
+                    Set
+                    <span id="sortSet"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('CN')">
+                    Collector Number
+                    <span id="sortCN"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('Mark')">
+                    Mark
+                    <span id="sortMark"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('Lang')">
+                    Language
+                    <span id="sortLang"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('Confirmed')">
+                    Confirmed
+                    <span id="sortConfirmed"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('Colors')">
+                    Colors
+                    <span id="sortColors"></span>
+                </th>
+                <th class="sortHeader" onclick="SortTable('Type')">
+                    Types
+                    <span id="sortType"></span>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var card in Model.Where(x => x.in_inventory).OrderBy(n => n.set).ThenBy(n => n.SortOrder).Take(50))
+            {
+                @if (card.in_inventory)
+                {
+                    @foreach (var inv in card.inventory)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                @if (card.hasArt && showArt)
+                                {
+                                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="@card.art.png" />
+                                }
+                                else
+                                {
+                                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="~/imgback.jpg" />
+                                }
+                            </td>
+                            <td>@card.name</td>
+                            <td>@card.set.ToUpper()</td>
+                            <td>@card.collector_number</td>
+                            <td>@inv.Mark</td>
+                            <td>@inv.Language</td>
+                            <td>@inv._confirmed</td>
+                            <td></td>
+                            <td>@card.type_line</td>
+                            <td>
+                                Update<br />
+                                Clone<br />
+                                Delete
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td class="text-center">
+                            @if (card.hasArt && showArt)
+                            {
+                                <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="@card.art.png" />
+                            }
+                            else
+                            {
+                                <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="~/imgback.jpg" />
+                            }
+                        </td>
+                        <td>@card.name</td>
+                        <td>@card.set</td>
+                        <td>@card.collector_number</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>@card.type_line</td>
+                        <td>
+                            Add
+                        </td>
+                    </tr>
+                }
+            }
+            <tr></tr>
+        </tbody>
+    </table>
+</div>

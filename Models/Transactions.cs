@@ -10,6 +10,7 @@ namespace CrummyApp.Models
         public int InventoryId { get; set; }        
         public string UpdateType { get; set; }
         public DateTime TransactionDate { get; set; }
+        public string TransactionUser { get; set; }
         public string Description { get; set; }
     }
 }

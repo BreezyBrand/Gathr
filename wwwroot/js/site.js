@@ -1,8 +1,10 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿var lastRequestId = "";
 
-// Write your JavaScript code.
+//GET
 function runSearch() {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId
+
     const set_code = document.getElementById("searchSet").value;
     const card_num = document.getElementById("searchNum").value;
     const lang_code = document.getElementById("searchLan").value;
@@ -17,39 +19,64 @@ function runSearch() {
         $.ajax({
             url: "Cards/CardDetails?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,
             success: function (result) {
-                document.getElementById("searchResults").innerHTML = result
-                toggleInventory()
+                if (RequestId == lastRequestId) {
+                    document.getElementById("searchResults").innerHTML = result
+                    toggleInventory()
+                }
             },
             error: function (result) {
                 console.log(result)
             }
         })
-    } else if (toggleType == "bulk") {
+    }
+    else if (toggleType == "bulk") {
         $.ajax({
             url: "Cards/GetBulk?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,
             success: function (result) {
-                document.getElementById("searchResults").innerHTML = result;
-                reformatCardHeads();
-                toggleInventory()
+                if (RequestId == lastRequestId) {
+                    document.getElementById("searchResults").innerHTML = result;
+                    reformatCardHeads();
+                    toggleInventory()
+                }
             },
             error: function (result) {
                 console.log(result)
             }
         })
-    } else {
+    }
+    else if (toggleType == "inventory") {
+        $.ajax({
+            url: "Cards/GetInventory?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    document.getElementById("searchResults").innerHTML = result;
+                    reformatCardHeads();
+                    toggleInventory()
+                }
+            },
+            error: function (result) {
+                console.log(result)
+            }
+        })
+    }
+    else {
         document.getElementById("searchResults").innerHTML = "<p>Whoops! We're not ready for you to do that yet!</p>"
     }
 }
 
 function searchEZ(cards) {
-    console.log(cards)
-    $.ajax({
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    ajaxReq = $.ajax({
         url: "Cards/EZSearch",
         contentType: "application/json",
-        data: { raw_cards: JSON.stringify(cards)},
+        data: { raw_cards: JSON.stringify(cards) },
         success: function (result) {
-            document.getElementById("searchResults").innerHTML = result
-            toggleInventory()
+            if (RequestId == lastRequestId) {
+                document.getElementById("searchResults").innerHTML = result
+                toggleInventory()
+            }
         },
         error: function (result) {
             console.log(result)
@@ -57,8 +84,117 @@ function searchEZ(cards) {
     })
 }
 
+function getTransactions() {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    const set_code = document.getElementById("searchSet").value;
+    const card_num = document.getElementById("searchNum").value;
+    const lang_code = document.getElementById("searchLan").value;
+
+    ajaxReq = $.ajax({
+        url: "Cards/TransactionLog?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById("searchResults").innerHTML = result
+                toggleInventory()
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+//POST
+function AddCard(id) {
+    console.log(id)
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    $.ajax({
+        url: "Cards/AddToInventory?card_id=" + id,
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById(id).innerHTML = result
+                ajaxReq = null;
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function UpdateInventory(id, cardid) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId
+    console.log("Updating card " + id)
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;
+    lan = document.getElementById(id + "_lan").value;
+
+    $.ajax({
+        url: "Cards/UpdateInventory",
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id: id,
+            Language: lan,
+            Location: loc,
+            Mark: mark,
+            _confirmed: conf
+        },
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById(cardid).innerHTML = result
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function DeleteInventory(id, cardid) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    console.log("Deleting card " + id)
+
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;
+    lan = document.getElementById(id + "_lan").value;
+
+    $.ajax({
+        url: "Cards/DeleteFromInventory",
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id: id,
+            Language: lan,
+            Location: loc,
+            Mark: mark,
+            _confirmed: conf
+        },
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById(cardid).innerHTML = result
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+
+//Display
 function toggleSearch(toggleType) {
     document.getElementById("toggleType").value = toggleType;
+    document.getElementById("searchResults").innerHTML = "";
+    runSearch();
 }
 
 function toggleMassEntry() {
@@ -76,11 +212,11 @@ function toggleInventory() {
             var thisEle = all_Results[i]
             if (thisEle.classList.contains("InInventory")) {
                 console.log("Card " + i + " in inventory")
-                thisEle.classList.remove("collapse")                
+                thisEle.classList.remove("collapse")
             } else {
                 console.log("Card " + i + " not in inventory")
-                thisEle.classList.add("collapse")                
-            }            
+                thisEle.classList.add("collapse")
+            }
         }
     } else {
         for (i = 0; i < all_Results.length; i++) {
@@ -89,74 +225,7 @@ function toggleInventory() {
         }
     }
 }
-function AddCard(id) {
-    console.log(id)
 
-    $.ajax({
-        url: "Cards/AddToInventory?card_id=" + id,
-        success: function (result) {
-            document.getElementById(id).innerHTML = result
-        },
-        error: function (result) {
-            console.log(result)
-        }
-    })
-}
-
-function UpdateInventory(id, cardid) {
-    console.log("Updating card " + id)
-    mark = document.getElementById(id + "_mark").value;
-    loc = document.getElementById(id + "_loc").value;
-    conf = document.getElementById(id + "_conf").checked;    
-    lan = document.getElementById(id + "_lan").value;    
-
-    $.ajax({
-        url: "Cards/UpdateInventory",        
-        data: {
-            Card_Id: cardid,
-            confirmed_date: new Date(),
-            Id:id,
-            Language:lan,
-            Location:loc,
-            Mark:mark,
-            _confirmed:conf
-        },
-        success: function (result) {
-            document.getElementById(cardid).innerHTML = result
-        },
-        error: function (result) {
-            console.log(result)
-        }
-    })
-}
-
-function DeleteInventory(id, cardid) {
-    console.log("Deleting card " + id)
-
-    mark = document.getElementById(id + "_mark").value;
-    loc = document.getElementById(id + "_loc").value;
-    conf = document.getElementById(id + "_conf").checked;    
-    lan = document.getElementById(id + "_lan").value;    
-
-    $.ajax({
-        url: "Cards/DeleteFromInventory",        
-        data: {
-            Card_Id: cardid,
-            confirmed_date: new Date(),
-            Id:id,
-            Language:lan,
-            Location:loc,
-            Mark:mark,
-            _confirmed:conf
-        },
-        success: function (result) {
-            document.getElementById(cardid).innerHTML = result
-        },
-        error: function (result) {
-            console.log(result)
-        }
-    })
-}
 
 //Text Parsing
 function parseBulkSearch() {
@@ -179,6 +248,24 @@ function parseBulkSearch() {
     searchEZ(ez_cards);
 }
 
+//Table Functions
+function SortTable(field) {
+    //<i class="bi bi-arrow-up"></i>
+    //<i class="bi bi-arrow-down"></i>
+    document.getElementById("sortName").innerHTML = "";
+    document.getElementById("sortSet").innerHTML = "";
+    document.getElementById("sortCN").innerHTML = "";
+    document.getElementById("sortMark").innerHTML = "";
+    document.getElementById("sortLang").innerHTML = "";
+    document.getElementById("sortConfirmed").innerHTML = "";
+    document.getElementById("sortColors").innerHTML = "";
+    document.getElementById("sortType").innerHTML = "";
+
+    var table = document.getElementById("InvTable").getElementsByTagName("tbody")
+
+
+
+}
 
 //Stupid Formatting Code
 function reformatCardHeads() {
@@ -194,4 +281,16 @@ function reformatCardHeads() {
         headers[i].style["min-height"] = max_height + "px"
         headers[i].style["height"] = max_height + "px"
     }
+}
+
+//Request validation
+function makeid() {
+    var result = '';
+    var length = 25;
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }    
+    return result;
 }
