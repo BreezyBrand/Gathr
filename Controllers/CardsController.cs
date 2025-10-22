@@ -24,15 +24,32 @@ namespace CrummyApp.Controllers
         //Functions
         private List<Card> searchCards(string? set_code, string lang_code = "EN", string card_num = "")
         {
-            List<Card> cards = new List<Card>();
+            List<Card> cards = _context.Cards.ToList();
             //Search if both set and number are available
+            if (!set_code.IsNullOrEmpty())
+            {
+                List<string> setList = set_code.ToLower().Split(",").ToList();
+                cards = cards.Where(x => setList.Contains(x.set)).ToList();
+            }
+
+            if (!card_num.IsNullOrEmpty())
+            {
+                cards = cards.Where(x => x.collector_number.Equals(card_num)).ToList();
+            }
+
+            if (!lang_code.IsNullOrEmpty())
+            {
+                cards = cards.Where(x => x.lang.Equals(lang_code.ToLower())).ToList();
+            }
+
+            return cards;
+            //Older Filter Below
             if (!set_code.IsNullOrEmpty() && !card_num.IsNullOrEmpty())
             {
                 List<string> setList = set_code.Split(",").ToList();
 
                 cards = _context.Cards.Where(x =>
-                        x.set.Equals(set_code)
-                        && set_code.Contains(x.set)
+                        set_code.Contains(x.set)
                         && x.collector_number.Equals(card_num)
                         && x.lang.Equals(lang_code)
                     ).ToList();
@@ -43,12 +60,17 @@ namespace CrummyApp.Controllers
                 List<string> setList = set_code.Split(",").ToList();
 
                 cards = _context.Cards.Where(x =>
-                        x.set.Equals(set_code)
-                        && set_code.Contains(x.set)
+                        set_code.Contains(x.set)
                         && x.lang.Equals(lang_code)
                     ).ToList();
             }
-
+            else if (set_code.IsNullOrEmpty() && !card_num.IsNullOrEmpty())
+            {
+                cards = _context.Cards.Where(x =>
+                        x.collector_number.Equals(card_num)
+                        && x.lang.Equals(lang_code)
+                    ).ToList();
+            }
             return cards;
         }
         private List<CardView> processCards(List<Card> cards)
@@ -150,7 +172,7 @@ namespace CrummyApp.Controllers
                 confirmed_date = DateTime.Now,
                 UpdateUser = Environment.MachineName,
                 Mark = ""
-            }
+            };
             _context.Inventory.Add(new_opts);
             _context.SaveChanges();
 

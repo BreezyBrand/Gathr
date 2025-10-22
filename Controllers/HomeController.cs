@@ -17,8 +17,11 @@ namespace CrummyApp.Controllers
         }
 
         public IActionResult Index()
-        {                       
-            return View();
+        {
+            List<CardImages> imgs = _context.Images.OrderBy(n => Guid.NewGuid()).Take(3).ToList();
+            
+            
+            return View(imgs);
         }
 
         public IActionResult Privacy()

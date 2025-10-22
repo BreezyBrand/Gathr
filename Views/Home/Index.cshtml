@@ -1,5 +1,8 @@
-﻿@{
+﻿@model List<CardImages>
+@inject IConfiguration config;
+@{
     ViewData["Title"] = "Home";
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
 }
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -19,7 +22,7 @@
 <br />
 <div class="tab-content" id="pills-tabContent">
     <div id="searchEntry" class="container tab-pane fade show active" role="tabpanel" aria-labelledby="search-tab" tabindex="0">
-        <h4>Search Card Database</h4>            
+        <h4>Search Card Database</h4>
     </div>
     <div id="inventorySearch" class="container tab-pane fade" role="tabpanel" aria-labelledby="inventory-tab" tabindex="1">
         <h4>Inventory</h4>
@@ -35,4 +38,13 @@
 </div>
 
 <div id="searchResults" class="container">
+</div>
+<div id="LoadingShuffle" class="collapse">
+    <div class="flickity-container">
+        <div class="hand">
+            <div id="shuffleCard1" class="card card-1"><span></span></div>
+            <div id="shuffleCard2" class="card card-2"><span></span></div>
+            <div id="shuffleCard3" class="card card-3"><span></span></div>
+        </div>
+    </div>
 </div>
