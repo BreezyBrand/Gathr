@@ -13,10 +13,17 @@ namespace CrummyApp.Models
         public string Mark { get; set; }
         public string Location { get; set; }
         public string Language { get; set; }
+        public string UpdateUser { get; set; }
         [Column("Confirmed")]
         public bool _confirmed { get; set; }
         public DateTime confirmed_date { get; set; }        
     }    
+
+    public class tempInv : InvOptions
+    {
+
+    }
+
     [Table("PriceHistory")]
     public class PriceOptions
     {

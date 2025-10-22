@@ -136,7 +136,7 @@ namespace CrummyApp.Controllers
             thisCard.processCardDetails(card);
             return PartialView("_InventoryDetails", thisCard.inventory);
         }
-        public PartialViewResult UpdateInventory([Bind("Card_Id,confirmed_date,Id,Language,Location,Mark,_confirmed")] InvOptions inv)
+        public PartialViewResult UpdateInventory([Bind("Card_Id,confirmed_date,Id,Language,Location,Mark,_confirmed")] tempInv inv)
         {
             //Find card
             Card card = _context.Cards.Find(inv.Card_Id);
@@ -148,7 +148,13 @@ namespace CrummyApp.Controllers
             }
             //Add found card to inventory, provide base options                        
             string updateNote = CompareInventory(old, inv);
-            old = inv;
+            
+            old.Mark = inv.Mark;
+            old.confirmed_date = DateTime.Now;
+            old._confirmed = inv._confirmed;
+            old.Location = inv.Location;
+            old.UpdateUser = Environment.MachineName;
+
             _context.Inventory.Update(old);
             _context.SaveChanges();
 
@@ -180,7 +186,7 @@ namespace CrummyApp.Controllers
         }
 
         //Tracking Details
-        private string CompareInventory(InvOptions old,InvOptions inv)
+        private string CompareInventory(InvOptions old,tempInv inv)
         {
             string running_note = "";
 

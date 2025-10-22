@@ -17,9 +17,7 @@ namespace CrummyApp.Controllers
         }
 
         public IActionResult Index()
-        {
-            int cardCount = _context.Cards.Count();
-            
+        {                       
             return View();
         }
 

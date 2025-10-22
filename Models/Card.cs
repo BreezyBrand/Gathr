@@ -60,14 +60,11 @@ namespace CrummyApp.Models
             this.type_line = card.type_line;
             this.rarity = card.rarity;
             this.alternate_name = card.flavor_name;
-            this.hasArt = false;
+            
 
             this.prices = _context.Pricing.Find(card.Id);
             this.art = _context.Images.Find(card.Id);
-            if (!this.art.Equals(null))
-            {
-                this.hasArt = true;
-            }
+            this.hasArt = true;
             
             this.inventory = _context.Inventory.Where(x => x.Card_Id.Equals(card.Id)).ToList();
         }

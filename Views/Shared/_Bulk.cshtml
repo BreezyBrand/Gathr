@@ -10,6 +10,19 @@
 @*Locations*@        
 <div class="container-fluid">
     <div class="row g-0">
+        <div class="col-4">
+            <label>Language</label>
+            <input id="bulkLang"/>
+        </div>
+        <div class="col-4">
+            <label>Location</label>
+            <input id="bulkLoc" />
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row g-0">
         @foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
         {
             thisID = card.Id;
@@ -42,7 +55,7 @@
                     else
                     {
                         <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="~/imgback.jpg" />
-                    }                    
+                    }
                 </div>
                 <div class="card-footer container-fluid">
                     <div class="row">
@@ -50,17 +63,19 @@
                         {
                             <div class="col-4">
                                 <label class="small form-label fw-bold text-center">None</label>
-                                <input type="number" class="form-control" id="nomark_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk('@thisID','none')" id="nomark_@thisID" />
                             </div>
                             <div class="col-4">
                                 <label class="small form-label fw-bold text-center">Foil</label>
-                                <input type="number" class="form-control" id="foil_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk('@thisID','f')" id="foil_@thisID" />
                             </div>
                             <div class="col-4">
                                 <label class="small form-label fw-bold text-center">Etched</label>
-                                <input type="number" class="form-control" id="etched_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk('@thisID','etch')" id="etched_@thisID" />
                             </div>
-                        } else {
+                        }
+                        else
+                        {
                             <div class="col-6">
                                 <label class="small form-label fw-bold text-center">None</label>
                                 <input type="number" class="form-control" id="nomark_@thisID" />
