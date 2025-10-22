@@ -105,6 +105,8 @@ function getTransactions() {
         }
     })
 }
+
+
 //POST
 function AddCard(id) {
     console.log(id)
@@ -146,8 +148,44 @@ function UpdateInventory(id, cardid) {
             _confirmed: conf
         },
         success: function (result) {
-            if (RequestId == lastRequestId) {
+            if (document.getElementById("toggleType").value == "inventory") {
+                document.getElementById("toggleType").value = "inventory"
+                runSearch();
+            } else {
                 document.getElementById(cardid).innerHTML = result
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function CloneInventory(id, cardid) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId
+    console.log("Updating card " + id)
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;
+    lan = document.getElementById(id + "_lan").value;
+
+    $.ajax({
+        url: "Cards/CloneInventory",
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id: id,
+            Language: lan,
+            Location: loc,
+            Mark: mark,
+            _confirmed: conf
+        },
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById("toggleType").value = "inventory"
+                runSearch();
+                //document.getElementById(cardid).innerHTML = result
             }
         },
         error: function (result) {
@@ -180,7 +218,12 @@ function DeleteInventory(id, cardid) {
         },
         success: function (result) {
             if (RequestId == lastRequestId) {
-                document.getElementById(cardid).innerHTML = result
+                if (document.getElementById("toggleType").value == "inventory") {
+                    document.getElementById("toggleType").value = "inventory"
+                    runSearch();
+                } else {
+                    document.getElementById(cardid).innerHTML = result
+                }
             }
         },
         error: function (result) {
@@ -198,8 +241,8 @@ function toggleSearch(toggleType) {
 }
 
 function toggleMassEntry() {
-    var massEntry = document.getElementById("MassEntry");
-    massEntry.classList.toggle("collapse")
+    document.getElementById("MassEntry").classList.toggle("collapse");
+    document.getElementById("basicSearch").classList.toggle("collapse")
 }
 
 function toggleInventory() {
@@ -248,6 +291,7 @@ function parseBulkSearch() {
     searchEZ(ez_cards);
 }
 
+
 //Table Functions
 function SortTable(field) {
     //<i class="bi bi-arrow-up"></i>
@@ -267,6 +311,7 @@ function SortTable(field) {
 
 }
 
+
 //Stupid Formatting Code
 function reformatCardHeads() {
     var headers = document.getElementsByClassName("card-header")
@@ -283,6 +328,7 @@ function reformatCardHeads() {
     }
 }
 
+
 //Request validation
 function makeid() {
     var result = '';
@@ -291,6 +337,6 @@ function makeid() {
     var charactersLength = characters.length;
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }    
+    }
     return result;
 }

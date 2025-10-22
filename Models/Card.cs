@@ -16,18 +16,26 @@ namespace CrummyApp.Models
         public string lang { get; set; }
         public string name { get; set; }
         public string type_line { get; set; }
+        public string colors { get; set; }
         public string rarity { get; set; }
         public string flavor_name { get; set; }
         public string prices { get; set; }
         public string image_uris { get; set; }
-    }
-    public class CardView
-    {
-        private readonly ApplicationContext _context;
-        public CardView(ApplicationContext context)
+
+        public string DisplayName()
         {
-            _context = context;
+            if (!flavor_name.IsNullOrEmpty())
+            {
+                return flavor_name + " ("+name+")";
+            }
+            return name;
         }
+        
+    }
+    public class CardView(ApplicationContext context)
+    {
+        private readonly ApplicationContext _context = context;
+
         //Basic Card Details            
         public string Id { get; set; }
         public string set { get; set; }
@@ -36,6 +44,7 @@ namespace CrummyApp.Models
         public string lang { get; set; }
         public string name { get; set; }
         public string type_line { get; set; }
+        public List<string> colors { get; set; }
         public string rarity { get; set; }
         public string alternate_name { get; set; }
         //Price Variable
@@ -45,7 +54,15 @@ namespace CrummyApp.Models
         public bool hasArt { get; set; }
         //Inventory Specific
         public bool in_inventory { get; set; }
-        public List<InvOptions> inventory { get; set; }
+        public List<InvOptions> inventory { get; set; } 
+        public string DisplayNameHTML()
+        {
+            if (!alternate_name.IsNullOrEmpty())
+            {
+                return alternate_name + "<br/><span class='small'>("+name+")</span>";
+            }
+            return name;
+        }
         public void processCardDetails(Card card)
         {
             int sortCheck;
@@ -57,17 +74,37 @@ namespace CrummyApp.Models
             this.collector_number = card.collector_number;
             this.SortOrder = sortCheck;
             this.lang = card.lang;
-            this.type_line = card.type_line;
+            this.type_line = card.type_line;            
             this.rarity = card.rarity;
             this.alternate_name = card.flavor_name;
-            
-
             this.prices = _context.Pricing.Find(card.Id);
             this.art = _context.Images.Find(card.Id);
-            this.hasArt = true;
-            
+            this.hasArt = true;            
             this.inventory = _context.Inventory.Where(x => x.Card_Id.Equals(card.Id)).ToList();
             this.in_inventory = this.inventory.Any();
+
+            this.colors = new List<string>();
+            if (card.colors.Contains("W"))
+            {
+                this.colors.Add("White");
+            }
+            if (card.colors.Contains("U"))
+            {
+                this.colors.Add("Blue");
+            }
+            if (card.colors.Contains("B"))
+            {
+                this.colors.Add("Black");
+            }
+            if (card.colors.Contains("R"))
+            {
+                this.colors.Add("Red");
+            }
+            if (card.colors.Contains("G"))
+            {
+                this.colors.Add("Green");
+            }            
+
         }
     }
     public class EzCard

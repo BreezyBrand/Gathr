@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using CrummyApp.Data;
 using CrummyApp.Models;
@@ -147,12 +148,13 @@ namespace CrummyApp.Controllers
                 Language = "EN",
                 _confirmed = true,
                 confirmed_date = DateTime.Now,
+                UpdateUser = Environment.MachineName,
                 Mark = ""
-            };
+            }
             _context.Inventory.Add(new_opts);
             _context.SaveChanges();
 
-            TransactionUpdate_Inventory(new_opts, "Added new copy of " + card.name + " (" + card.Id + ")", "Create");
+            TransactionUpdate_Inventory(new_opts, "Added new copy of " + card.DisplayName() + " (" + card.Id + ")", "Create");
 
             //Reset view
             CardView thisCard = new CardView(_context);
@@ -171,11 +173,12 @@ namespace CrummyApp.Controllers
             }
             //Add found card to inventory, provide base options                        
             string updateNote = CompareInventory(old, inv);
+            updateNote = "Updated " + card.DisplayName() + " (Inventory ID# " + inv.Id.ToString() + "). " + updateNote;
 
-            old.Mark = inv.Mark;
+            old.Mark = inv.Mark.IsNullOrEmpty() ? "" : inv.Mark;
             old.confirmed_date = DateTime.Now;
             old._confirmed = inv._confirmed;
-            old.Location = inv.Location;
+            old.Location = inv.Location.IsNullOrEmpty() ? "" : inv.Location;
             old.UpdateUser = Environment.MachineName;
 
             _context.Inventory.Update(old);
@@ -188,6 +191,36 @@ namespace CrummyApp.Controllers
             thisCard.processCardDetails(card);
             return PartialView("_InventoryDetails", thisCard.inventory);
         }
+        public CardView CloneInventory([Bind("Card_Id,confirmed_date,Id,Language,Location,Mark,_confirmed")] InvOptions inv)
+        {
+            //Find card
+            Card card = _context.Cards.Find(inv.Card_Id);
+
+            if (card == null)
+            {
+                throw new InvalidOperationException("No matching Card Id");
+            }
+            InvOptions newInv = new InvOptions()
+            {
+                Card_Id = card.Id,
+                confirmed_date = DateTime.Now,
+                Location = inv.Location,
+                UpdateUser = Environment.MachineName,
+                Language = inv.Language,
+                Mark = inv.Mark,
+                _confirmed = inv._confirmed
+            };
+
+            //Add found card to inventory, provide base options                        
+            TransactionUpdate_Inventory(newInv, "Added new copy of " + card.DisplayName() + " (" + card.Id + ")", "Create");
+            _context.Inventory.Add(newInv);
+            _context.SaveChanges();
+
+            //Reset view
+            CardView thisCard = new CardView(_context);
+            thisCard.processCardDetails(card);
+            return thisCard;
+        }
         public PartialViewResult DeleteFromInventory([Bind("Card_Id,confirmed_date,Id,Language,Location,Mark,_confirmed")] InvOptions inv)
         {
             //Find card
@@ -198,7 +231,7 @@ namespace CrummyApp.Controllers
             }
             //Add found card to inventory, provide base options            
             _context.Inventory.Remove(inv);
-            string updateNote = "Deleted Inventory ID# " + inv.Id.ToString() + " from inventory";
+            string updateNote = "Deleted " + card.DisplayName() + " (Inventory ID# " + inv.Id.ToString() + ") from inventory";
             TransactionUpdate_Inventory(inv, updateNote, "Delete");
             _context.SaveChanges();
 
@@ -271,7 +304,6 @@ namespace CrummyApp.Controllers
 
             return;
         }
-
 
     }
 }

@@ -947,7 +947,6 @@ EXEC [dbo].[SeedTransactions] @CardId='36f85c90-08e9-42cd-9d5d-55f77d5544aa', @I
 EXEC [dbo].[SeedTransactions] @CardId='85da2e65-4e22-48b6-98ad-6969684d69e1', @InventoryID=-19236, @Method='Delete', @Date='2025-08-26', @User='IBC-20NW9Z3',@Message='Delete'
 EXEC [dbo].[SeedTransactions] @CardId='157cf43c-f7f2-4362-bfc8-11682e94b747', @InventoryID=19025, @Method='Create', @Date='2025-08-05', @User='IBC-20NW9Z3',@Message='Create'
 EXEC [dbo].[SeedTransactions] @CardId='0013620d-8e17-4246-86bf-71eafd51b806', @InventoryID=9329, @Method='Create', @Date='2025-09-29', @User='IBC-20NW9Z3',@Message='Create'
-EXEC [dbo].[SeedTransactions] @CardId='NULL', @InventoryID=15851, @Method='Update', @Date='2025-07-31', @User='IBC-20NW9Z3',@Message='Update'
 EXEC [dbo].[SeedTransactions] @CardId='a41c39a2-68fc-4a49-ac74-e696a25f7f85', @InventoryID=4852, @Method='Update', @Date='2025-08-11', @User='IBC-20NW9Z3',@Message='Update'
 EXEC [dbo].[SeedTransactions] @CardId='a2f498ac-179e-4055-9b83-97bcc5ab1bb9', @InventoryID=-20544, @Method='Delete', @Date='2025-07-31', @User='IBC-20NW9Z3',@Message='Delete'
 EXEC [dbo].[SeedTransactions] @CardId='c775a7d1-a1f7-460b-b1f4-888006058e15', @InventoryID=32, @Method='Create', @Date='2025-09-30', @User='IBC-20NW9Z3',@Message='Create'

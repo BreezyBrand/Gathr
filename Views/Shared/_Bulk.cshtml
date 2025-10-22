@@ -12,7 +12,7 @@
     <div class="row g-0">
         <div class="col-4">
             <label>Language</label>
-            <input id="bulkLang"/>
+            <input id="bulkLang" />
         </div>
         <div class="col-4">
             <label>Location</label>
@@ -32,18 +32,8 @@
             <div class="col-2 card @invClass mt-2 invCard">
                 <div class="card-header d-flex justify-content-center align-items-center">
                     <p class="small text-center align-middle flex-fill m-0 p-0">
-                        @if (card.alternate_name.Equals(""))
-                        {
-                            <strong>@card.name</strong>
-                            <br />
-                        }
-                        else
-                        {
-                            <strong>@card.alternate_name</strong>
-                            <br />
-                            <span>(@card.name)</span>
-                            <br />
-                        }
+                        <strong>@Html.Raw(card.DisplayNameHTML())</strong>
+                        <br />
                         <span>(@card.set.ToUpper():@card.collector_number)</span>
                     </p>
                 </div>

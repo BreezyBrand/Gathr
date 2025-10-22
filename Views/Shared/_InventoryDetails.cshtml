@@ -12,8 +12,8 @@
                 <tr>
                     <th class="collapse">Inventory ID</th>
                     <th>Mark</th>
-                    <th>Location</th>
                     <th>Language</th>
+                    <th>Location</th>                    
                     <th>Confirmed</th>
                     <th class="collapse">Date</th>
                     <th>Actions</th>
@@ -36,13 +36,13 @@
                             <input class="form-control" id="@mark_id" value="@inv.Mark" />
                         </td>
                         <td>
-                            <input class="form-control" id="@loc_id" value="@inv.Location" />
-                        </td>
-                        <td>
                             <input class="form-control" id="@lan_id" value="@inv.Language" />
                         </td>
+                        <td>
+                            <input class="form-control" id="@loc_id" value="@inv.Location" />
+                        </td>                        
                         <td class="text-center">
-                            @if (inv._confirmed)
+                            @if(inv._confirmed)
                             {
                                 <input type="checkbox" class="form-check" id="@conf_id" value="@inv._confirmed" checked/>
                             } else {
@@ -52,11 +52,11 @@
                         <td class="collapse">
                             @inv.confirmed_date
                         </td>
-                        <td class="text-center">
-                            <button class="btn btn-success w-100" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">
+                        <td class="text-center" style="min-width:100px">
+                            <button class="btn btn-success" onclick="UpdateInventory(@inv.Id,'@inv.Card_Id.ToString()')">
                                 <i class="bi bi-save"></i>
                             </button>
-                            <button class="btn btn-danger w-100" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">
+                            <button class="btn btn-danger" onclick="DeleteInventory(@inv.Id,'@inv.Card_Id.ToString()')">
                                 <i class="bi bi-trash3"></i>
                             </button>
                         </td>
