@@ -1,5 +1,5 @@
 ﻿<div id="searchBar" class="container">
-    <div class="row">        
+    <div class="row">
         <div class="col-12 pb-3 text-end">
             <button class="btn btn-primary" onclick="">Advanced Options</button>
             <button class="btn btn-secondary" onclick="toggleMassEntry()">Batch Search Settings</button>
@@ -7,29 +7,50 @@
     </div>
     <div class="row g-3" id="basicSearch">
         <input class="form-control collapse" id="toggleType" value="database" />
-        <div class="col-4">
+        <div class="col-3">
             <label class="form-label fw-bold">Set</label>
             <input onblur="runSearch()" class="form-control" id="searchSet" />
         </div>
-        <div class="col-4">
+        <div class="col-3">
             <label class="form-label fw-bold">Set Number</label>
             <input onblur="runSearch()" class="form-control" id="searchNum" />
         </div>
-        <div class="col-4">
+        <div class="col-3">
             <label class="form-label fw-bold">Language</label>
-            <input onblur="runSearch()" class="form-control" id="searchLan" />
+            <select onblur="runSearch()" class="form-control" id="searchLan">
+                <optgroup label="Language Select">
+                    <option value="">--- Pick a Language ---</option>
+                    <option value="ALL">Any</option>
+                </optgroup>
+                <partial name="_Language" />
+            </select>
         </div>
-        <div class="col-4">
-            <label class="form-label fw-bold">Inventory Toggle</label>
-            <input type="checkbox" onclick="toggleInventory()" class="form-check" id="toggleInv" />
+        <div class="col-3">
+            <label class="form-label fw-bold">Tag</label>
+            <input onblur="runSearch()" class="form-control" id="searchTag" />
+        </div>
+        <div class="col-3">
+            <label class="form-label fw-bold">Inventory Toggle</label><br />
+            <input type="checkbox" onclick="toggleInventory(true)" class="" id="toggleInv" />
+            <label for="toggleInv">In Inventory</label>
+            <br />
+            <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" />
+            <label for=" toggleNotInv">Not In Inventory</label>
         </div>
     </div>
-    <div class="row collapse" id="MassEntry">
-        <input class="form-control collapse" id="toggleType" value="database" />
+    <div class="row collapse" id="MassEntry">        
         <div class="col-4">
             <label class="form-label fw-bold">Mass Entry</label>
             <p class="small">Use the SET:NUM format. Please separate cards with a new line.</p>
             <textarea onblur="parseBulkSearch()" class="form-control w-100" id="bulkEntry"></textarea>
-        </div>        
+        </div>
     </div>
+    <hr />
+    <div id="SearchResultsReport">
+        <input id="LoadedRows" value="0"/>
+        <p>
+            <span id="SearchResultReportP"></span>
+        </p>        
+    </div>
+    <hr />
 </div>

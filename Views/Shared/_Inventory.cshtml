@@ -55,7 +55,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var card in Model.Where(x => x.in_inventory).OrderBy(n => n.set).ThenBy(n => n.SortOrder))
+            @foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
             {
                 @if (card.in_inventory)
                 {
@@ -66,8 +66,8 @@
                         string conf_id = inv.Id + "_conf";
                         string row_id = inv.Id + "_row";
                         string lan_id = inv.Id + "_lan";
-                        
-                        <tr>
+
+                        <tr class="invCard InInventory">
                             <td class="text-center">
                                 @if (card.hasArt && showArt)
                                 {
@@ -85,7 +85,10 @@
                                 <input id="@mark_id" value="@inv.Mark" class="w-25"/>                                
                             </td>
                             <td class="text-center">
-                                <input id="@lan_id" value="@inv.Language" class="w-25" />
+                                @* <input id="@lan_id" value="@inv.Language" class="w-25" /> *@
+                                <select class="form-control" id="@lan_id" value="@inv.Language">
+                                    <partial name="_Language" />
+                                </select>
                             </td>
                             <td>
                                 <input id="@loc_id" value="@inv.Location" class="w-100" />
@@ -116,7 +119,7 @@
                 }
                 else
                 {
-                    <tr>
+                    <tr class="invCard">
                         <td class="text-center">
                             @if (card.hasArt && showArt)
                             {
@@ -127,16 +130,24 @@
                                 <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="~/imgback.jpg" />
                             }
                         </td>
-                        <td>@card.name</td>
-                        <td>@card.set</td>
+                        <td>@Html.Raw(card.DisplayNameHTML())</td>
+                        <td>@card.set.ToUpper()</td>
                         <td>@card.collector_number</td>
                         <td></td>
+                        <td>@card.DecodeLanguage()</td>
                         <td></td>
                         <td></td>
-                        <td></td>
+                        <td>
+                            @foreach (var color in card.colors)
+                            {
+                                <span class="d-inline-block">@color</span>
+                            }
+                        </td>
                         <td>@card.type_line</td>
                         <td>
-                            Add
+                            <button class="btn btn-warning" onclick='AddCard("@card.Id")'>
+                                <i class="bi bi-file-plus"></i>
+                            </button>
                         </td>
                     </tr>
                 }

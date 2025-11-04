@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -14,15 +15,17 @@ namespace CrummyApp.Controllers
     {
         private readonly ILogger<CardsController> _logger;
         private readonly ApplicationContext _context;
+        private readonly IConfiguration _config;
 
-        public CardsController(ApplicationContext context, ILogger<CardsController> logger)
+        public CardsController(ApplicationContext context, ILogger<CardsController> logger, IConfiguration config)
         {
             _logger = logger;
             _context = context;
+            _config = config;
         }
 
         //Functions
-        private List<Card> searchCards(string? set_code, string lang_code = "EN", string card_num = "")
+        private List<Card> searchCards(string? set_code, string lang_code = "EN", string card_num = "", string tags = "")
         {
             List<Card> cards = _context.Cards.ToList();
             //Search if both set and number are available
@@ -37,71 +40,73 @@ namespace CrummyApp.Controllers
                 cards = cards.Where(x => x.collector_number.Equals(card_num)).ToList();
             }
 
-            if (!lang_code.IsNullOrEmpty())
+            if (!lang_code.Equals("ALL"))
             {
                 cards = cards.Where(x => x.lang.Equals(lang_code.ToLower())).ToList();
             }
 
-            return cards;
-            //Older Filter Below
-            if (!set_code.IsNullOrEmpty() && !card_num.IsNullOrEmpty())
+            if (!tags.IsNullOrEmpty())
             {
-                List<string> setList = set_code.Split(",").ToList();
+                List<string> tagList = tags.ToLower().Split(",").ToList();
+                
+                //Check Inventory
+                List<int> InvIds = _context.InvTags.Where(x => tagList.Contains(x.tagName)).Select(n=> n.invId).ToList();
+                List<string> CardIds = _context.Inventory.Where(x => InvIds.Contains(x.Id)).Select(n=>n.Card_Id).ToList();
+                
+                //Check Cards (COMING SOON)
+                cards = cards.Where(x => CardIds.Contains(x.Id)).ToList();
+            }
 
-                cards = _context.Cards.Where(x =>
-                        set_code.Contains(x.set)
-                        && x.collector_number.Equals(card_num)
-                        && x.lang.Equals(lang_code)
-                    ).ToList();
-            }
-            //Search but only set
-            else if (!set_code.IsNullOrEmpty() && card_num.IsNullOrEmpty())
-            {
-                List<string> setList = set_code.Split(",").ToList();
-
-                cards = _context.Cards.Where(x =>
-                        set_code.Contains(x.set)
-                        && x.lang.Equals(lang_code)
-                    ).ToList();
-            }
-            else if (set_code.IsNullOrEmpty() && !card_num.IsNullOrEmpty())
-            {
-                cards = _context.Cards.Where(x =>
-                        x.collector_number.Equals(card_num)
-                        && x.lang.Equals(lang_code)
-                    ).ToList();
-            }
-            return cards;
+            return cards;            
         }
-        private List<CardView> processCards(List<Card> cards)
+        private List<CardView> processCards(List<Card> cards, int skip = 0)
         {
-            List<CardView> processedCards = new List<CardView>();
+            int maxSingleLoad = _config.GetSection("MaxSingleLoad").Get<int>();
+            
+            List<CardView> sortedCards = new List<CardView>();            
             foreach (var card in cards.OrderBy(n => n.collector_number))
             {
                 CardView thisCard = new CardView(_context);
-                thisCard.processCardDetails(card);
-                processedCards.Add(thisCard);
+                thisCard.SetSortOrder(card);
+                sortedCards.Add(thisCard);
             }
-            return processedCards;
-        }
+            sortedCards = sortedCards.OrderBy(n => n.set).ThenBy(n => n.SortOrder).Skip(skip).Take(maxSingleLoad).ToList();
+            ViewData["MaxResults"] = sortedCards.Count();
+            
+            List<CardView> processedCards = new List<CardView>();
+            foreach (var card in sortedCards)
+            {                
+                card.processCardDetails(card.CardObj);
+                processedCards.Add(card);
+            }
 
-        //GET Endpoints
-        public PartialViewResult CardDetails(string? set_code, string lang_code = "EN", string card_num = "")
+            return processedCards.ToList();
+        }
+        private List<Card> getCardsByName(string name)
         {
-            List<Card> cards = searchCards(set_code, lang_code, card_num);
-            List<CardView> processedCards = processCards(cards);
+            string normalized_name = name.ToUpper();
+            List<Card> cards = _context.Cards.ToList();
+            cards = cards.Where(x => x.name.ToUpper().Equals(normalized_name)).ToList();
+
+            return cards;
+        }
+        //GET Endpoints
+        public PartialViewResult CardDetails(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
+        {
+            List<Card> cards = searchCards(set_code, lang_code, card_num, tags);
+            List<CardView> processedCards = processCards(cards,skip);
             return PartialView("_CardDetails", processedCards.ToList());
         }
-        public PartialViewResult GetBulk(string? set_code, string lang_code = "EN", string card_num = "")
+        public PartialViewResult GetBulk(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
         {
-            List<Card> cards = searchCards(set_code, lang_code, card_num);
-            List<CardView> processedCards = processCards(cards);
+            List<Card> cards = searchCards(set_code, lang_code, card_num, tags);
+            List<CardView> processedCards = processCards(cards, skip);
             return PartialView("_Bulk", processedCards.ToList());
         }
-        public PartialViewResult GetInventory(string? set_code, string lang_code = "EN", string card_num = "")
+        public PartialViewResult GetInventory(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
         {
-            List<Card> cards = searchCards(set_code, lang_code, card_num);
-            List<CardView> processedCards = processCards(cards);
+            List<Card> cards = searchCards(set_code, lang_code, card_num, tags);
+            List<CardView> processedCards = processCards(cards,skip);
             return PartialView("_Inventory", processedCards.ToList());
         }
         public PartialViewResult EZSearch(string raw_cards)
@@ -123,12 +128,24 @@ namespace CrummyApp.Controllers
             {
                 if (!ezCard.SetCode.IsNullOrEmpty() && !ezCard.CardNum.IsNullOrEmpty())
                 {
-                    cards.AddRange(
-                            _context.Cards.Where(x =>
+                    List<Card> matchedCards = _context.Cards.Where(x =>
                                 x.set.Equals(ezCard.SetCode)
                                 && x.collector_number.Equals(ezCard.CardNum)
-                            ).ToList()
+                            ).ToList();
+
+                    if(matchedCards.Where(x => x.lang.ToUpper().Equals("EN")).Any())
+                    {
+                        cards.Add(
+                            matchedCards.Where(x => x.lang.ToUpper().Equals("EN")).First()
                         );
+                    } else
+                    {
+                        cards.Add(
+                            matchedCards.First()
+                        );
+                    }
+
+                    
                 }
             }
 
@@ -152,7 +169,12 @@ namespace CrummyApp.Controllers
             return PartialView("_Transactions", log.OrderByDescending(n => n.TransactionDate).ToList());
         }
 
-
+        public PartialViewResult AllCardsByName(string name)
+        {
+            List<Card> cards = getCardsByName(name);
+            List<CardView> processedCards = processCards(cards);
+            return PartialView("_Inventory", processedCards.ToList());
+        }
         //POST Endpoints
         public PartialViewResult AddToInventory(string card_id)
         {
@@ -262,7 +284,29 @@ namespace CrummyApp.Controllers
             thisCard.processCardDetails(card);
             return PartialView("_InventoryDetails", thisCard.inventory);
         }
+        public string UpdateCardArt(string id, [Bind("small,normal,large,png,art_crop,border_crop")] CardImages imgs)
+        {
+            if(_context.Images.Where(x => x.Id.Equals(id)).Any())
+            {
+                CardImages oldImg = _context.Images.Where(x => x.Id.Equals(id)).First();
 
+                oldImg.small = imgs.small;
+                oldImg.normal = imgs.small;
+                oldImg.large = imgs.small;
+                oldImg.png = imgs.small;
+                oldImg.art_crop = imgs.small;
+                oldImg.border_crop = imgs.small;
+                _context.Images.Update(oldImg);
+
+            } else
+            {
+                imgs.Id = id;
+                _context.Images.Add(imgs);
+            }
+            _context.SaveChanges();
+
+            return "Updated";
+        }
         //Tracking Details
         private string CompareInventory(InvOptions old, tempInv inv)
         {

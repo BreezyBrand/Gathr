@@ -9,15 +9,15 @@ namespace CrummyApp.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Card_Id { get; set; }
+        public string Card_Id { get; set; }        
         public string Mark { get; set; }
         public string Location { get; set; }
         public string Language { get; set; }
         public string UpdateUser { get; set; }
         [Column("Confirmed")]
         public bool _confirmed { get; set; }
-        public DateTime confirmed_date { get; set; }        
-    }    
+        public DateTime confirmed_date { get; set; }
+    }
 
     public class tempInv : InvOptions
     {
@@ -43,7 +43,8 @@ namespace CrummyApp.Models
             {
                 double.TryParse(this.usd, out val);
             }
-            else if(mark.Equals("f")) {
+            else if (mark.Equals("f"))
+            {
                 double.TryParse(this.usd_foil, out val);
             }
             else
@@ -61,7 +62,8 @@ namespace CrummyApp.Models
                 if (usd.IsNullOrEmpty())
                 {
                     return usd_foil;
-                } else
+                }
+                else
                 {
                     return usd;
                 }
@@ -87,5 +89,61 @@ namespace CrummyApp.Models
 
             return "";
         }
+    }
+
+    public class Marks
+    {
+        //f-etch, -, f-pre, f-pp, pp, f, f list, *pp*, list
+        public bool foil { get; set; }
+        public bool etched { get; set; }
+        public bool promo { get; set; }
+        public bool list { get; set; }
+        override public string ToString()
+        {
+            string markString = "";
+            markString += foil ? "f" : "";
+            markString += etched ? "-etch" : "";
+            markString += promo ? "-pp" : "";
+            markString += list ? " list" : "";
+
+            return markString.Trim();
+        }
+
+        public void ParseMarks(string mark)
+        {
+            etched = false;
+            foil = false;
+            promo = false;
+            list = false;
+
+            if (mark.Contains("etch"))
+            {
+                etched = true;
+            }
+
+            if (mark.Contains("pp") || mark.Contains("pre"))
+            {
+                promo = true;
+            }
+
+            if (mark.Contains("list"))
+            {
+                list = true;
+            }
+
+            if (mark.Contains("f"))
+            {
+                foil = true;
+            }
+        }
+    }
+
+    [Table("InvTags")]
+    public class InvTag
+    {
+        public int ID { get; set; }
+        public int invId { get; set; }
+        public string tagName { get; set; }
+
     }
 }

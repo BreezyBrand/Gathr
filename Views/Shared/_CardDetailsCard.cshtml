@@ -1,0 +1,83 @@
+﻿@model CardView
+@inject IConfiguration config;
+
+@{
+    CardView card = Model;
+    string thisID;
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
+    bool inInv;
+    string invClass;
+    thisID = card.Id;
+    inInv = card.inventory.Any();
+    invClass = inInv ? "InInventory" : "";
+}
+
+<div class="col-6 invCard @invClass">
+    <div id="MatchDetails" class="container">
+        <div class="row">
+            <div class="col-3 text-center">
+                <p><strong>Image</strong></p>
+                @if (card.hasArt && showArt)
+                {
+                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art.png" />
+                }
+                else
+                {
+                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="~/imgback.jpg" />
+                }
+                <br />(@card.set.ToUpper():@card.collector_number)
+            </div>
+            <div class="col-9 container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <p>
+                            <strong>Name:</strong> @card.name<br />
+                            <strong>Type:</strong> @card.type_line<br />
+                            <strong>Alternate Name:</strong> @card.alternate_name
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p>
+                            <strong>Rarity:</strong><br />
+                            @card.rarity
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p>
+                            <strong>Price:</strong><br />
+                            @card.GetPriceRange()
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p>
+                            <strong>Updated:</strong><br />
+                            @if (inInv)
+                            {
+                                <span>@card.inventory.Select(n => n.confirmed_date).ToList().Max().ToShortDateString()</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="col-4">
+                        <p>
+                            <strong>Language Code:</strong><br />
+                            @card.DecodeLanguage()
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12" id="@card.Id">
+                <partial name="_InventoryDetails" model="card.inventory" />
+            </div>
+            <div class="col-12 text-end">
+                <button class="btn btn-warning" onclick='ExpandName("@card.name")'>
+                    See All Cards with this Name
+                </button>
+                <button class="btn btn-warning" onclick='AddCard("@thisID")'>
+                    <i class="bi bi-file-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <hr />
+</div>
+

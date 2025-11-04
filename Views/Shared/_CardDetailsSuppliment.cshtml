@@ -1,0 +1,12 @@
+﻿@model List<CardView>
+@inject IConfiguration config;
+@{    
+    bool showArt = config.GetSection("ShowArt").Get<bool>();    
+}
+
+
+@foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
+{
+    <partial name="_CardDetailsCard" model="card" />
+}
+

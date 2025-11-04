@@ -1,0 +1,60 @@
+﻿@model InvOptions
+@{
+    string mark_id = Model.Id + "_mark";
+    Marks theseMarks = new Marks();
+
+    theseMarks.ParseMarks(Model.Mark);
+}
+
+<input class="form-control collapse" id="@mark_id" value="@Model.Mark" disabled />
+<div class="markCheckBoxes" id="Checkboxes_@mark_id" onclick="updateMarkings(@Model.Id)">
+    @if (!theseMarks.foil && !theseMarks.etched && !theseMarks.promo && !theseMarks.list)
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="none_@mark_id" class="pr-1" onclick="ResetMark(@Model.Id)" checked />
+    }
+    else
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="none_@mark_id" class="pr-1" onclick="ResetMark(@Model.Id)" />
+    }
+    <label for="none_@mark_id">None</label>
+    <br />
+    @if (theseMarks.foil)
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="foil_@mark_id" class="pr-1" checked />
+    }
+    else
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="foil_@mark_id" class="pr-1" />
+    }
+    <label for="foil_@mark_id">Foil</label>
+    <br />
+    @if (theseMarks.etched)
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="etched_@mark_id" class="pr-1" checked />
+    }
+    else
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="etched_@mark_id" class="pr-1" />
+    }
+    <label for="etched_@mark_id">Etched</label>
+    <br />
+    @if (theseMarks.promo)
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="promo_@mark_id" class="pr-1" checked />
+    }
+    else
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="promo_@mark_id" class="pr-1" />
+    }
+    <label for="promo_@mark_id">Promo</label>
+    <br />
+    @if (theseMarks.list)
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="list_@mark_id" class="pr-1" checked />
+    }
+    else
+    {
+        <input type="checkbox" name="Marks_@mark_id" id="list_@mark_id" class="pr-1" />
+    }
+    <label for="list_@mark_id">List</label>
+</div>

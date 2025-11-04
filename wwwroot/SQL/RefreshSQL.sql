@@ -4,6 +4,8 @@ DROP TABLE [dbo].[Legalities];
 DROP TABLE [dbo].[InventoryV2];
 DROP TABLE [dbo].[TransactionLog]
 DROP TABLE [dbo].[Images]
+DROP TABLE [dbo].[InvTags]
+DROP VIEW [dbo].[SpreadsheetView]
 
 CREATE TABLE [dbo].[InventoryV2] (
     [Id]             INT           IDENTITY (1, 1) NOT NULL,
@@ -17,6 +19,13 @@ CREATE TABLE [dbo].[InventoryV2] (
     PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_InventoryV2_ToCards] FOREIGN KEY ([Card_Id]) REFERENCES [dbo].[Cards] ([id])
 );
+
+CREATE TABLE [dbo].[InvTags]
+(
+	[Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	InvId INT NOT NULL,
+	tagNAme VARCHAR(100) NOT NULL
+)
 
 CREATE TABLE [dbo].[PriceHistory] (
     [CardId]      VARCHAR (250) NOT NULL,
@@ -78,8 +87,38 @@ CREATE TABLE [dbo].[Images] (
     [png]         VARCHAR (250) NULL,
     [art_crop]    VARCHAR (250) NULL,
     [border_crop] VARCHAR (250) NULL,
-    PRIMARY KEY CLUSTERED ([Id] ASC),
+	[side]		  varchar(1) null
+    PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+
+
+
+GO;
+
+CREATE VIEW [dbo].[SpreadsheetView]
+	AS 
+	SELECT 
+		c.id,
+		COUNT(c.id) as 'QTY',
+		c.[name],
+		UPPER(c.[set]) as 'Set Code',
+		c.[collector_number],
+		i.Mark,
+		i.[Location],
+		i.[Language],
+		c.rarity,
+		c.type_line,
+		TRY_CAST((CASE WHEN i.Mark LIKE '%f%' THEN usd_foil
+		      WHEN i.Mark LIKE '%etch%'THEN usd_etched			  
+			  ELSE usd
+		END) as decimal(18,2)) as 'Price'
+	FROM 
+		[InventoryV2] i 
+		LEFT JOIN Cards c ON c.id=i.Card_Id
+		LEFT JOIN PriceHistory p ON i.Card_Id = p.CardId
+	GROUP BY c.id, c.[name], c.[set], c.collector_number, i.Mark, i.[Location],i.[Language], c.rarity, c.type_line, usd, usd_etched, usd_foil;
+
+	GO;
 
 
 INSERT INTO 
@@ -169,6 +208,15 @@ FROM
 	Cards c
 	JOIN Images i ON c.id=i.Id
 
-
+INSERT INTO InvTags (InvId,tagName)
+SELECT
+	i.Id,
+	'Expensive'
+FROM
+	InventoryV2 i 
+	LEFT JOIN Cards c ON i.Card_Id = c.id
+	LEFT JOIN SpreadsheetView s ON s.id = c.id
+WHERE 
+	s.Price > 5
 
 EXEC [dbo].[SeedDatabase]

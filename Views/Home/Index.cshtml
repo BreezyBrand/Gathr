@@ -2,6 +2,7 @@
 @inject IConfiguration config;
 @{
     ViewData["Title"] = "Home";
+    ViewData["MaxResults"] = "";
     bool showArt = config.GetSection("ShowArt").Get<bool>();
 }
 
@@ -33,18 +34,31 @@
     <div id="transactionLog" class="container tab-pane fade" role="tabpanel" aria-labelledby="transactionLog" tabindex="3">
         <h4>Recent Transactions</h4>
     </div>
-    <partial name="_searchSettings" />
-    <hr />
+    <partial name="_searchSettings" />    
 </div>
 
 <div id="searchResults" class="container">
 </div>
+
+<div id="drillDown" class="collapse container">
+    <div id="drillDownHeader" class="row mb-1">
+        <div class="col-12">
+            <button class="btn btn-warning" onclick="returnDrilDown()">
+                Back to <span id="drillDownBtn">Card Database</span> 
+            </button>
+        </div>       
+    </div>
+    <hr />
+    <div id="drillDownBody" class="row container">
+
+    </div>
+</div>
 <div id="LoadingShuffle" class="collapse">
     <div class="flickity-container">
         <div class="hand">
-            <div id="shuffleCard1" class="card card-1"><span></span></div>
-            <div id="shuffleCard2" class="card card-2"><span></span></div>
-            <div id="shuffleCard3" class="card card-3"><span></span></div>
+            <div id="shuffleCard1" class="ani-card card-1"><span></span></div>
+            <div id="shuffleCard2" class="ani-card card-2"><span></span></div>
+            <div id="shuffleCard3" class="ani-card card-3"><span></span></div>
         </div>
     </div>
 </div>
