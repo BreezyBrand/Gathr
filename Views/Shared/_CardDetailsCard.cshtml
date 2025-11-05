@@ -12,23 +12,31 @@
     invClass = inInv ? "InInventory" : "";
 }
 
-<div class="col-6 invCard @invClass">
-    <div id="MatchDetails" class="container">
+<div class="col-6 invCard @invClass card">
+    <div class="container card-body">
         <div class="row">
             <div class="col-3 text-center">
                 <p><strong>Image</strong></p>
                 @if (card.hasArt && showArt)
                 {
-                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art.png" />
+                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100 imgClick" src="@card.art.png" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
                 }
                 else
                 {
-                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="~/imgback.jpg" />
+                    <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100 imgClick" src="~/imgback.jpg" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
                 }
                 <br />(@card.set.ToUpper():@card.collector_number)
             </div>
             <div class="col-9 container-fluid">
                 <div class="row">
+                    <div class="col-12 text-end">
+                        <button class="btn btn-warning" onclick='ExpandName("@card.name")'>
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-warning" onclick='AddCard("@thisID")'>
+                            <i class="bi bi-file-plus"></i>
+                        </button>
+                    </div>
                     <div class="col-12">
                         <p>
                             <strong>Name:</strong> @card.name<br />
@@ -59,23 +67,21 @@
                     </div>
                     <div class="col-4">
                         <p>
-                            <strong>Language Code:</strong><br />
+                            <strong>Language:</strong><br />
                             @card.DecodeLanguage()
                         </p>
                     </div>
+                    <div class="col-12">
+                        <p>
+                            <strong>Oracle Text:</strong><br />
+                            @card.oracle_text
+                        </p>
+                    </div>
                 </div>
-            </div>
+            </div>            
             <div class="col-12" id="@card.Id">
                 <partial name="_InventoryDetails" model="card.inventory" />
-            </div>
-            <div class="col-12 text-end">
-                <button class="btn btn-warning" onclick='ExpandName("@card.name")'>
-                    See All Cards with this Name
-                </button>
-                <button class="btn btn-warning" onclick='AddCard("@thisID")'>
-                    <i class="bi bi-file-plus"></i>
-                </button>
-            </div>
+            </div>            
         </div>
     </div>
     <hr />

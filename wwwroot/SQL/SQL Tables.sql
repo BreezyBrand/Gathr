@@ -85,7 +85,6 @@ CREATE TABLE [dbo].[Images] (
     [png]         VARCHAR (250) NULL,
     [art_crop]    VARCHAR (250) NULL,
     [border_crop] VARCHAR (250) NULL,
-	[side]		  varchar(1) null
     PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

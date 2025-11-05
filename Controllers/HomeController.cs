@@ -108,7 +108,9 @@ namespace CrummyApp.Controllers
                 }
             }
             _context.SaveChanges();
-            return View(preCard);
+
+            return RedirectToAction("Index");
+            //return View(preCard);
         }
 
         public IActionResult Privacy()

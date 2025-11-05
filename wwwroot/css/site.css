@@ -35,6 +35,10 @@ body {
     height: 100px;
 }
 
+.imgClick{
+    cursor:pointer;
+}
+
 .ani-card {
     font-size: 22px;
     height: 270px;
@@ -43,7 +47,7 @@ body {
     border-radius: 3px;
     background-color: #b3704d;
     background-image: url("../imgback.jpg");
-    background-size: 100%;
+    background-size: 103%;
     background-position:center;
     background-repeat:no-repeat;
     background-color: lavender;

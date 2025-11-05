@@ -1,28 +1,34 @@
-﻿@model List<CardView>
+﻿@model ReturnRequest
 @inject IConfiguration config;
 
 @{
     string thisID;
     bool showArt = config.GetSection("ShowArt").Get<bool>();
+    int singleLoad = config.GetSection("MaxSingleLoad").Get<Int32>();
     bool inInv;
-    string invClass;    
+    string invClass;
 }
 @*Details*@
-@if (Model.Any())
+@if (Model.Cards.Any())
 {
     <div class="container-fluid">
         <div class="row">
-            @foreach (var card in Model)
+            @foreach (var card in Model.Cards)
             {
-                <partial name="_CardDetailsCard" model="card"/>
+                <partial name="_CardDetailsCard" model="card" />
             }
         </div>
     </div>
-}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12 text-center">
-            <button onclick="runMiniSearch()">Load More</button>
+
+
+    @if (!Model.LastProcessed.Equals(Model.max_matches))
+    {
+        <div class="container-fluid" id="miniSearchBlock">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <button onclick="runMiniSearch('Card Details')">Load More</button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    }
+}

@@ -1,4 +1,4 @@
-﻿@model List<CardView>
+﻿@model ReturnRequest
 @inject IConfiguration config;
 
 @{
@@ -25,11 +25,16 @@
 
 <div class="container-fluid">
     <div class="row g-0">
-        @foreach (var card in Model.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
+        @foreach (var card in Model.Cards.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
         {
             thisID = card.Id;
             inInv = card.inventory.Any();
             invClass = inInv ? "InInventory" : "";
+
+            var nCount = card.inventory.Where(n => n.Mark.Equals("-")).Count();
+            var fCount = card.inventory.Where(n => n.Mark.Equals("f")).Count();
+            var eCount = card.inventory.Where(n => n.Mark.Equals("etched")).Count();
+
 
             <div class="col-2 card @invClass mt-2 invCard">
                 <div class="card-header d-flex justify-content-center align-items-center">
@@ -42,11 +47,11 @@
                 <div class="card-body">
                     @if (card.hasArt && showArt)
                     {
-                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="@card.art.png" />
+                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100 imgClick" src="@card.art.png" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
                     }
                     else
                     {
-                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100" src="~/imgback.jpg" />
+                        <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100 imgClick" src="~/imgback.jpg" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
                     }
                 </div>
                 <div class="card-footer container-fluid">
@@ -55,26 +60,26 @@
                         {
                             <div class="col-4">
                                 <label class="small form-label fw-bold text-center">None</label>
-                                <input type="number" class="form-control" onchange="updateBulk('@thisID','none')" id="nomark_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk(this,'@thisID','none')" id="nomark_@thisID" value="@nCount"/>
                             </div>
                             <div class="col-4">
                                 <label class="small form-label fw-bold text-center">Foil</label>
-                                <input type="number" class="form-control" onchange="updateBulk('@thisID','f')" id="foil_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk(this,'@thisID','f')" id="foil_@thisID" value="@fCount"/>
                             </div>
                             <div class="col-4">
                                 <label class="small form-label fw-bold text-center">Etched</label>
-                                <input type="number" class="form-control" onchange="updateBulk('@thisID','etch')" id="etched_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk(this,'@thisID','etch')" id="etched_@thisID" value="@eCount"/>
                             </div>
                         }
                         else
                         {
                             <div class="col-6">
                                 <label class="small form-label fw-bold text-center">None</label>
-                                <input type="number" class="form-control" id="nomark_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk(this,'@thisID','none')" id="nomark_@thisID" value="@nCount"/>
                             </div>
                             <div class="col-6">
                                 <label class="small form-label fw-bold text-center">Foil</label>
-                                <input type="number" class="form-control" id="foil_@thisID" />
+                                <input type="number" class="form-control" onchange="updateBulk(this,'@thisID','f')" id="foil_@thisID" value="@fCount"/>
                             </div>
                         }
                     </div>

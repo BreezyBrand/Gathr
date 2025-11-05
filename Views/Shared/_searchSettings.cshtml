@@ -1,23 +1,27 @@
 ﻿<div id="searchBar" class="container">
     <div class="row">
         <div class="col-12 pb-3 text-end">
-            <button class="btn btn-primary" onclick="">Advanced Options</button>
+            <button class="btn btn-primary" onclick="toggleAdvancedOptions(this)">Show Advanced Options</button>
             <button class="btn btn-secondary" onclick="toggleMassEntry()">Batch Search Settings</button>
         </div>
     </div>
     <div class="row g-3" id="basicSearch">
         <input class="form-control collapse" id="toggleType" value="database" />
         <div class="col-3">
+            <label class="form-label fw-bold">Name</label>
+            <input onchange="runSearch()" class="form-control" id="searchName" />
+        </div>
+        <div class="col-3">
             <label class="form-label fw-bold">Set</label>
-            <input onblur="runSearch()" class="form-control" id="searchSet" />
+            <input onchange="runSearch()" class="form-control" id="searchSet" />
         </div>
         <div class="col-3">
             <label class="form-label fw-bold">Set Number</label>
-            <input onblur="runSearch()" class="form-control" id="searchNum" />
+            <input onchange="runSearch()" class="form-control" id="searchNum" />
         </div>
         <div class="col-3">
             <label class="form-label fw-bold">Language</label>
-            <select onblur="runSearch()" class="form-control" id="searchLan">
+            <select onchange="runSearch()" class="form-control" id="searchLan">
                 <optgroup label="Language Select">
                     <option value="">--- Pick a Language ---</option>
                     <option value="ALL">Any</option>
@@ -25,32 +29,76 @@
                 <partial name="_Language" />
             </select>
         </div>
-        <div class="col-3">
+        <div class="col-3 AdvSearch collapse">
             <label class="form-label fw-bold">Tag</label>
-            <input onblur="runSearch()" class="form-control" id="searchTag" />
+            <input onchange="runSearch()" class="form-control" id="searchTag" />
         </div>
-        <div class="col-3">
+        <div class="col-3 AdvSearch collapse">
+            <label class="form-label fw-bold">Oracle</label>
+            <input onchange="runSearch()" class="form-control" id="searchOracle" />
+        </div>
+        <div class="col-3 AdvSearch collapse">
+            <label class="form-label fw-bold">Location</label>
+            <input onchange="runSearch()" class="form-control" id="searchLoc" />
+        </div>
+        <div class="col-3 AdvSearch collapse">
+            <label class="form-label fw-bold">Colors</label>
+            <input onchange="runSearch()" class="form-control collapse" id="searchColors" disabled />
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-4">
+                        <input id="colorWhite" type="checkbox" value="White" onclick="toggleColor(this)" />
+                        <label for="colorWhite">White</label>
+                    </div>
+                    <div class="col-4">
+                        <input id="colorBlue" type="checkbox" value="Blue" onclick="toggleColor(this)" />
+                        <label for="colorBlue">Blue</label>
+                    </div>
+                    <div class="col-4">
+                        <input id="colorBlack" type="checkbox" value="Black" onclick="toggleColor(this)" />
+                        <label for="colorBlack">Black</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <input id="colorRed" type="checkbox" value="Red" onclick="toggleColor(this)" />
+                        <label for="colorRed">Red</label>
+                    </div>
+                    <div class="col-4">
+                        <input id="colorGreen" type="checkbox" value="Green" onclick="toggleColor(this)" />
+                        <label for="colorGreen">Green</label>
+                    </div>
+                    <div class="col-4">
+                        <input id="colorNone" type="checkbox" value="Colorless" onclick="toggleColor(this)" />
+                        <label for="colorNone">None</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3 AdvSearch collapse">
+            <label class="form-label fw-bold">Type</label>
+            <input onchange="runSearch()" class="form-control" id="searchTypeLine" />
+        </div>
+        <div class="col-3 AdvSearch collapse">
             <label class="form-label fw-bold">Inventory Toggle</label><br />
-            <input type="checkbox" onclick="toggleInventory(true)" class="" id="toggleInv" />
+            <input type="checkbox" onclick="toggleInventory(true)" class="" id="toggleInv" checked />
             <label for="toggleInv">In Inventory</label>
             <br />
-            <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" />
+            <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" checked />
             <label for=" toggleNotInv">Not In Inventory</label>
         </div>
-    </div>
-    <div class="row collapse" id="MassEntry">        
-        <div class="col-4">
-            <label class="form-label fw-bold">Mass Entry</label>
-            <p class="small">Use the SET:NUM format. Please separate cards with a new line.</p>
-            <textarea onblur="parseBulkSearch()" class="form-control w-100" id="bulkEntry"></textarea>
+        <div id="SearchResultsReport" class="col-12">
+            <input id="LoadedRows" class="collapse" value="0" />
+            <input id="currentlyProcessing" class="collapse" value="false" />
+            <p id="SearchResultsText">No Results</p>
         </div>
     </div>
-    <hr />
-    <div id="SearchResultsReport">
-        <input id="LoadedRows" value="0"/>
-        <p>
-            <span id="SearchResultReportP"></span>
-        </p>        
+    <div class="row collapse" id="MassEntry">
+        <div class="col-12">
+            <label class="form-label fw-bold">Mass Entry</label>
+            <p class="small">Use the SET:NUM format. Please separate cards with a new line.</p>
+            <textarea onchange="parseBulkSearch()" class="form-control w-100" id="bulkEntry"></textarea>
+        </div>
     </div>
-    <hr />
+    <hr />       
 </div>

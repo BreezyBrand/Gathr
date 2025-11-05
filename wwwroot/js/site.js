@@ -1,10 +1,567 @@
-﻿var lastRequestId = "";//GETfunction runSearch() {    lastRequestId = makeid();    var RequestId = lastRequestId;    const set_code = document.getElementById("searchSet").value;    const card_num = document.getElementById("searchNum").value;    const lang_code = document.getElementById("searchLan").value;    const tags = document.getElementById("searchTag").value;    const toggleType = document.getElementById("toggleType").value;    console.log("Searching...")    if (set_code == "" && card_num == "" && lang_code == "" && tags == "") {        document.getElementById("searchResults").classList.remove("collapse");        document.getElementById("LoadingShuffle").classList.add("collapse");        return;    }    if (toggleType == "database") {        $.ajax({            url: "Cards/CardDetails?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code+ "&tags=" + tags,            success: function (result) {                if (RequestId == lastRequestId) {                    document.getElementById("searchResults").innerHTML = result;                    document.getElementById("searchResults").classList.remove("collapse");                    document.getElementById("LoadingShuffle").classList.add("collapse");                    toggleInventory();                                    }            },            error: function (result) {                console.log(result)            }        })    }    else if (toggleType == "bulk") {        $.ajax({            url: "Cards/GetBulk?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code+ "&tags=" + tags,            success: function (result) {                if (RequestId == lastRequestId) {                    document.getElementById("searchResults").innerHTML = result;                    document.getElementById("searchResults").classList.remove("collapse");                    document.getElementById("LoadingShuffle").classList.add("collapse");                    reformatCardHeads();                    toggleInventory();                }            },            error: function (result) {                console.log(result);            }        })    }    else if (toggleType == "inventory") {        $.ajax({            url: "Cards/GetInventory?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code+ "&tags=" + tags,            success: function (result) {                if (RequestId == lastRequestId) {                    document.getElementById("searchResults").innerHTML = result;                    document.getElementById("searchResults").classList.remove("collapse");                    document.getElementById("LoadingShuffle").classList.add("collapse");                    reformatCardHeads();                    toggleInventory();                }            },            error: function (result) {                console.log(result);            }        })    }    else {        document.getElementById("searchResults").innerHTML = "<p>Whoops! We're not ready for you to do that yet!</p>";        document.getElementById("searchResults").classList.remove("collapse");        document.getElementById("LoadingShuffle").classList.add("collapse");    }}function runMiniSearch() {    lastRequestId = makeid();    var RequestId = lastRequestId;    document.getElementById("searchResults").classList.remove("collapse");    const set_code = document.getElementById("searchSet").value;    const card_num = document.getElementById("searchNum").value;    const lang_code = document.getElementById("searchLan").value;    const tags = document.getElementById("searchTag").value;    const toggleType = document.getElementById("toggleType").value;    console.log("Searching...")    var count = document.getElementById("LoadedRows").value;    if (set_code == "" && card_num == "" && lang_code == "" && tags == "") {        document.getElementById("searchResults").classList.remove("collapse");        document.getElementById("LoadingShuffle").classList.add("collapse");        return;    }
-    $.ajax({        url: "Cards/CardDetails?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code + "&tags=" + tags + "&skip=" + count,            success: function (result) {                if (RequestId == lastRequestId) {                    document.getElementById("searchResults").innerHTML += result;                    document.getElementById("searchResults").classList.remove("collapse");                    document.getElementById("LoadingShuffle").classList.add("collapse");                    toggleInventory();                              EndRequest()                }            },            error: function (result) {                console.log(result)            }        })
-}function ExpandName(name) {    lastRequestId = makeid();    var RequestId = lastRequestId;    const toggleType = document.getElementById("toggleType").value;    console.log("Searching...")    $.ajax({        url: "Cards/AllCardsByName/?name=" + name,        success: function (result) {            if (RequestId == lastRequestId) {                document.getElementById("drillDownBody").innerHTML = result;                document.getElementById("searchResults").classList.add("collapse");                document.getElementById("drillDown").classList.remove("collapse");                document.getElementById("LoadingShuffle").classList.add("collapse");                toggleInventory();            }        },        error: function (result) {            console.log(result)        }    })}function searchEZ(cards) {    lastRequestId = makeid();    var RequestId = lastRequestId;    ajaxReq = $.ajax({        url: "Cards/EZSearch",        contentType: "application/json",        data: { raw_cards: JSON.stringify(cards) },        success: function (result) {            if (RequestId == lastRequestId) {                document.getElementById("searchResults").innerHTML = result                document.getElementById("searchResults").classList.remove("collapse")                document.getElementById("LoadingShuffle").classList.add("collapse")                toggleInventory()            }        },        error: function (result) {            console.log(result)        }    })}function getTransactions() {    lastRequestId = makeid();    var RequestId = lastRequestId;    const set_code = document.getElementById("searchSet").value;    const card_num = document.getElementById("searchNum").value;    const lang_code = document.getElementById("searchLan").value;    ajaxReq = $.ajax({        url: "Cards/TransactionLog?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,        success: function (result) {            if (RequestId == lastRequestId) {                document.getElementById("searchResults").innerHTML = result                document.getElementById("searchResults").classList.remove("collapse")                document.getElementById("LoadingShuffle").classList.add("collapse")                toggleInventory()            }        },        error: function (result) {            console.log(result)        }    })}//POSTfunction AddCard(id) {    console.log(id)    lastRequestId = makeid();    var RequestId = lastRequestId;    document.getElementById("searchResults").classList.remove("collapse")    document.getElementById("LoadingShuffle").classList.add("collapse")    $.ajax({        url: "Cards/AddToInventory?card_id=" + id,        success: function (result) {            if (RequestId == lastRequestId) {                if (document.getElementById("toggleType").value == "inventory") {                    document.getElementById("toggleType").value = "inventory"                    runSearch();                } else {                    document.getElementById(id).innerHTML = result                                    }            }        },        error: function (result) {            console.log(result)        }    })}function UpdateInventory(id, cardid) {    lastRequestId = makeid();    var RequestId = lastRequestId    console.log("Updating card " + id)    mark = document.getElementById(id + "_mark").value;    loc = document.getElementById(id + "_loc").value;    conf = document.getElementById(id + "_conf").checked;    lan = document.getElementById(id + "_lan").value;    $.ajax({        url: "Cards/UpdateInventory",        data: {            Card_Id: cardid,            confirmed_date: new Date(),            Id: id,            Language: lan,            Location: loc,            Mark: mark,            _confirmed: conf        },        success: function (result) {            if (document.getElementById("toggleType").value == "inventory") {                document.getElementById("toggleType").value = "inventory"                runSearch();            } else {                document.getElementById(cardid).innerHTML = result            }        },        error: function (result) {            console.log(result)        }    })}function CloneInventory(id, cardid) {    lastRequestId = makeid();    var RequestId = lastRequestId    console.log("Updating card " + id)    mark = document.getElementById(id + "_mark").value;    loc = document.getElementById(id + "_loc").value;    conf = document.getElementById(id + "_conf").checked;    lan = document.getElementById(id + "_lan").value;    $.ajax({        url: "Cards/CloneInventory",        data: {            Card_Id: cardid,            confirmed_date: new Date(),            Id: id,            Language: lan,            Location: loc,            Mark: mark,            _confirmed: conf        },        success: function (result) {            if (RequestId == lastRequestId) {                document.getElementById("toggleType").value = "inventory"                runSearch();                //document.getElementById(cardid).innerHTML = result            }        },        error: function (result) {            console.log(result)        }    })}function DeleteInventory(id, cardid) {    lastRequestId = makeid();    var RequestId = lastRequestId;    console.log("Deleting card " + id)    mark = document.getElementById(id + "_mark").value;    loc = document.getElementById(id + "_loc").value;    conf = document.getElementById(id + "_conf").checked;    lan = document.getElementById(id + "_lan").value;    $.ajax({        url: "Cards/DeleteFromInventory",        data: {            Card_Id: cardid,            confirmed_date: new Date(),            Id: id,            Language: lan,            Location: loc,            Mark: mark,            _confirmed: conf        },        success: function (result) {            if (RequestId == lastRequestId) {                if (document.getElementById("toggleType").value == "inventory") {                    document.getElementById("toggleType").value = "inventory"                    runSearch();                } else {                    document.getElementById(cardid).innerHTML = result                }            }        },        error: function (result) {            console.log(result)        }    })}//Displayfunction toggleSearch(toggleType) {    document.getElementById("toggleType").value = toggleType;    if (toggleType == "inventory") {        document.getElementById("toggleInv").checked = true;
-    }    document.getElementById("searchResults").innerHTML = "";    document.getElementById("searchResults").classList.add("collapse")    document.getElementById("LoadingShuffle").classList.remove("collapse")    runSearch();}function toggleMassEntry() {    document.getElementById("MassEntry").classList.toggle("collapse");    document.getElementById("basicSearch").classList.toggle("collapse")}function toggleInventory(dir) {    var invCheck = document.getElementById("toggleInv").checked    var notInvCheck = document.getElementById("toggleNotInv").checked    var all_Results = document.getElementsByClassName("invCard")            if (invCheck || notInvCheck) {        if (dir) {            document.getElementById("toggleInv").checked = true;            document.getElementById("toggleNotInv").checked = false;            for (i = 0; i < all_Results.length; i++) {                var thisEle = all_Results[i]                if (thisEle.classList.contains("InInventory")) {                    thisEle.classList.remove("collapse")                } else {                    thisEle.classList.add("collapse")                }            }
-        } else {            document.getElementById("toggleInv").checked = false;            document.getElementById("toggleNotInv").checked = true;            for (i = 0; i < all_Results.length; i++) {                var thisEle = all_Results[i]                if (!thisEle.classList.contains("InInventory")) {                    thisEle.classList.remove("collapse")                } else {                    thisEle.classList.add("collapse")                }            }
-        }    }    else {        for (i = 0; i < all_Results.length; i++) {            var thisEle = all_Results[i]            thisEle.classList.remove("collapse")        }    }    EndRequest();}function returnDrilDown() {    document.getElementById("searchResults").classList.remove("collapse");    document.getElementById("drillDown").classList.add("collapse");    document.getElementById("LoadingShuffle").classList.add("collapse")
-}//Text Parsingfunction parseBulkSearch() {    var raw_val = document.getElementById("bulkEntry").value;    var raw_cards = raw_val.split("\n")    var ez_cards = [];    for (i = 0; i < raw_cards.length; i++) {        try {            console.log(raw_cards[i]);            ez_card = raw_cards[i].split(":")            ez_cards[i] = {                SetCode: ez_card[0],                CardNum: ez_card[1]            };        } catch (e) {        }    }    searchEZ(ez_cards);}//Table Functionsfunction SortTable(field) {    //<i class="bi bi-arrow-up"></i>    //<i class="bi bi-arrow-down"></i>    document.getElementById("sortName").innerHTML = "";    document.getElementById("sortSet").innerHTML = "";    document.getElementById("sortCN").innerHTML = "";    document.getElementById("sortMark").innerHTML = "";    document.getElementById("sortLang").innerHTML = "";    document.getElementById("sortConfirmed").innerHTML = "";    document.getElementById("sortColors").innerHTML = "";    document.getElementById("sortType").innerHTML = "";    var table = document.getElementById("InvTable").getElementsByTagName("tbody")}//Stupid Formatting Codefunction reformatCardHeads() {    var headers = document.getElementsByClassName("card-header")    var max_height = 0;    for (i = 0; i < headers.length; i++) {        if (headers[i].offsetHeight > max_height) {            max_height = headers[i].offsetHeight        }    }    console.log("max header height is " + max_height)    for (i = 0; i < headers.length; i++) {        headers[i].style["min-height"] = max_height + "px"        headers[i].style["height"] = max_height + "px"    }}function updateMarkings(id) {    //name: Marks_@mark_id
+﻿var lastRequestId = "";
+
+function UpdateSearchStats(updateSkip, max) {
+    console.log("Updating search stats")
+    document.getElementById("LoadedRows").value = updateSkip;
+    var loads = document.getElementsByClassName("InvCard")
+    var count = 0;
+    for (i = 0; i < loads.length; i++) {
+        if (!loads[i].classList.contains("collapse")) {
+            count++
+        }
+    }
+    document.getElementById("SearchResultsText").innerHTML = "Showing " + count + " of " + max
+}
+
+function getSearchTerms() {
+
+    const searchName = document.getElementById("searchName").value;
+    const set_code = document.getElementById("searchSet").value;
+    const card_num = document.getElementById("searchNum").value;
+    const lang_code = document.getElementById("searchLan").value;
+    const tags = document.getElementById("searchTag").value;
+    const colors = document.getElementById("searchColors").value;
+    const oracle = document.getElementById("searchOracle").value;
+    const location = document.getElementById("searchLoc").value;
+    const typeLines = "";
+    const valid = (searchName == "" && set_code == "" && card_num == "" && lang_code == "" && tags == "")
+
+    const searchData = {
+        name: searchName,
+        set_code: set_code,
+        card_num: card_num,
+        lang_code: lang_code,
+        tags: tags,
+        color: colors,
+        location: location,
+        types: typeLines,
+        oracle: oracle,
+        skip: 0,
+        isValid: valid
+    }
+    console.log(searchData)
+    return searchData;
+}
+
+//GET
+function runSearch() {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+    var searchData = getSearchTerms()
+    const toggleType = document.getElementById("toggleType").value;
+
+    console.log("Searching...")
+    if (searchData["isValid"]) {
+        document.getElementById("searchResults").classList.remove("collapse");
+        document.getElementById("LoadingShuffle").classList.add("collapse");
+        return;
+    }
+
+    if (toggleType == "database") {
+        $.ajax({
+            url: "Cards/CardDetails",
+            data: searchData,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    document.getElementById("searchResults").innerHTML = result;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+                    toggleInventory();
+                    EndRequest()
+                }
+            },
+            error: function (result) {
+                console.log(result)
+            }
+        })
+    }
+    else if (toggleType == "bulk") {
+        $.ajax({
+            url: "Cards/GetBulk",
+            data: searchData,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    document.getElementById("searchResults").innerHTML = result;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+                    toggleInventory();
+                    EndRequest()
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        })
+    }
+    else if (toggleType == "inventory") {
+        $.ajax({
+            url: "Cards/GetInventory",
+            data: searchData,
+            success: function (result) {
+                console.log(result.length)
+                if (RequestId == lastRequestId) {
+
+                    document.getElementById("searchResults").innerHTML = result;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+
+                    try {
+                        if (document.getElementById("InvTableendResults")) {
+                            document.getElementById("LoadMoreFooterRow").innerHTML = "";
+                        }
+                    } catch (e) {
+
+                    } finally {
+                        toggleInventory();
+                        EndRequest()
+                    }
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        })
+    }
+    else {
+        document.getElementById("searchResults").innerHTML = "<p>Whoops! We're not ready for you to do that yet!</p>";
+        document.getElementById("searchResults").classList.remove("collapse");
+        document.getElementById("LoadingShuffle").classList.add("collapse");
+    }
+}
+function runMiniSearch(source) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+    document.getElementById("searchResults").classList.remove("collapse");
+    const set_code = document.getElementById("searchSet").value;
+    const card_num = document.getElementById("searchNum").value;
+    const lang_code = document.getElementById("searchLan").value;
+    const tags = document.getElementById("searchTag").value;
+    const toggleType = document.getElementById("toggleType").value;
+    console.log("Searching...")
+
+    var count = document.getElementById("LoadedRows").value;
+
+    if (set_code == "" && card_num == "" && lang_code == "" && tags == "") {
+        document.getElementById("searchResults").classList.remove("collapse");
+        document.getElementById("LoadingShuffle").classList.add("collapse");
+        return;
+    }
+
+    if (toggleType == "database") {
+        document.getElementById("miniSearchBlock").remove();
+        $.ajax({
+            url: "Cards/CardDetails?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code + "&tags=" + tags + "&skip=" + count,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    //YOU ARE HERE
+                    //YOU NEED TO UPDATE THE CALLBACK HERE
+                    //CREATE A NEW FUNCTION TO RETURN THE SEARCH DATA FOR THE AJAX REQUEST
+                    document.getElementById("searchResults").innerHTML += result;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+                    document.getElementById("currentlyProcessing").value = "false";
+                    toggleInventory();
+                    EndRequest()
+                }
+            },
+            error: function (result) {
+                console.log(result)
+            }
+        })
+    }
+
+    if (source == "inventory") {
+        //document.getElementById("LoadMoreFooterRow")
+        $.ajax({
+            url: "Cards/GetInventory?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code + "&tags=" + tags + "&skip=" + count,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    document.getElementById("InvTableBody").innerHTML += result;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+                    toggleInventory();
+                    EndRequest()
+                }
+            },
+            error: function (result) {
+                console.log(result)
+            }
+        })
+    }
+
+}
+function ExpandName(name) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+    const toggleType = document.getElementById("toggleType").value;
+    console.log("Searching...")
+
+    $.ajax({
+        url: "Cards/AllCardsByName/?name=" + name,
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById("drillDownBody").innerHTML = result;
+                document.getElementById("searchResults").classList.add("collapse");
+                document.getElementById("drillDown").classList.remove("collapse");
+                document.getElementById("LoadingShuffle").classList.add("collapse");
+                toggleInventory();
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+function searchEZ(cards) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    ajaxReq = $.ajax({
+        url: "Cards/EZSearch",
+        contentType: "application/json",
+        data: { raw_cards: JSON.stringify(cards) },
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById("searchResults").innerHTML = result
+                document.getElementById("searchResults").classList.remove("collapse")
+                document.getElementById("LoadingShuffle").classList.add("collapse")
+                toggleInventory()
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+function getTransactions() {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    const set_code = document.getElementById("searchSet").value;
+    const card_num = document.getElementById("searchNum").value;
+    const lang_code = document.getElementById("searchLan").value;
+
+    ajaxReq = $.ajax({
+        url: "Cards/TransactionLog?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code,
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                document.getElementById("searchResults").innerHTML = result
+                document.getElementById("searchResults").classList.remove("collapse")
+                document.getElementById("LoadingShuffle").classList.add("collapse")
+                toggleInventory()
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+//POST
+function AddCard(id) {
+    console.log(id)
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+    document.getElementById("searchResults").classList.remove("collapse")
+    document.getElementById("LoadingShuffle").classList.add("collapse")
+
+    $.ajax({
+        url: "Cards/AddToInventory?card_id=" + id,
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                if (document.getElementById("toggleType").value == "inventory") {
+                    document.getElementById("toggleType").value = "inventory"
+                    runSearch();
+                } else {
+                    document.getElementById(id).innerHTML = result
+                }
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function UpdateInventory(id, cardid, rowID) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId
+    console.log("Updating card " + id + "(" + rowID + ")")
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;
+    lan = document.getElementById(id + "_lan").value;
+
+    $.ajax({
+        url: "Cards/UpdateInventory",
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id: id,
+            Language: lan,
+            Location: loc,
+            Mark: mark,
+            _confirmed: conf
+        },
+        success: function (result) {
+            if (document.getElementById("toggleType").value == "inventory") {
+                document.getElementById("toggleType").value = "inventory"
+                runSearch();
+            } else {
+                document.getElementById(rowID).innerHTML = result
+                EndRequest();
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function CloneInventory(id, cardid, row_id) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId
+    console.log("Updating card " + id)
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;
+    lan = document.getElementById(id + "_lan").value;
+
+    $.ajax({
+        url: "Cards/CloneInventory",
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id: id,
+            Language: lan,
+            Location: loc,
+            Mark: mark,
+            _confirmed: conf
+        },
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                if (document.getElementById("toggleType").value == "inventory") {
+                    document.getElementById("toggleType").value = "inventory"
+                    runSearch();
+                } else {
+                    document.getElementById(rowID).innerHTML = result
+                    EndRequest();
+                }
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function DeleteInventory(id, cardid, rowID) {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    console.log("Deleting card " + id)
+    mark = document.getElementById(id + "_mark").value;
+    loc = document.getElementById(id + "_loc").value;
+    conf = document.getElementById(id + "_conf").checked;
+    lan = document.getElementById(id + "_lan").value;
+
+    $.ajax({
+        url: "Cards/DeleteFromInventory",
+        data: {
+            Card_Id: cardid,
+            confirmed_date: new Date(),
+            Id: id,
+            Language: lan,
+            Location: loc,
+            Mark: mark,
+            _confirmed: conf
+        },
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+                if (document.getElementById("toggleType").value == "inventory") {
+                    document.getElementById("toggleType").value = "inventory"
+                    runSearch();
+                } else {
+                    document.getElementById(rowID).innerHTML = result
+                    toggleInventory()
+                    EndRequest();
+                }
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function updateBulk(sInput, cardID, mark) {
+    console.log(cardID + "|" + mark + " new value: " + sInput.value)
+    var updateData = {
+        CardId,
+        mark,
+        newCount: sInput.value
+    }
+    $.ajax({
+        url: "",
+        data: updateData,
+        success: function (result) {
+            sInput.value = result
+        }
+    })
+
+
+}
+//Display
+function toggleSearch(toggleType) {
+    document.getElementById("toggleType").value = toggleType;
+    if (toggleType == "inventory") {
+        document.getElementById("toggleInv").checked = true;
+    }
+    document.getElementById("searchResults").innerHTML = "";
+    document.getElementById("searchResults").classList.add("collapse")
+    document.getElementById("LoadingShuffle").classList.remove("collapse")
+    runSearch();
+}
+
+function toggleAdvancedOptions(btn) {
+    var advOpts = document.getElementsByClassName("AdvSearch")
+    if (btn.innerHTML == "Show Advanced Options") {
+        btn.innerHTML = 'Hide Advanced Options'
+        for (i = 0; i < advOpts.length; i++) {
+            advOpts[i].classList.remove("collapse")
+        }
+    } else {
+        btn.innerHTML = "Show Advanced Options"
+        for (i = 0; i < advOpts.length; i++) {
+            advOpts[i].classList.add("collapse")
+        }
+    }
+}
+
+function toggleMassEntry() {
+    document.getElementById("MassEntry").classList.toggle("collapse");
+    document.getElementById("basicSearch").classList.toggle("collapse")
+}
+
+function toggleInventory() {
+    var invCheck = document.getElementById("toggleInv").checked
+    var notInvCheck = document.getElementById("toggleNotInv").checked
+    var all_Results = document.getElementsByClassName("invCard")
+
+    for (i = 0; i < all_Results.length; i++) {
+        var thisEle = all_Results[i]
+        thisEle.classList.add("collapse")
+
+        if (thisEle.classList.contains("InInventory") && invCheck) {
+            thisEle.classList.remove("collapse")
+        } else if (!thisEle.classList.contains("InInventory") && notInvCheck) {
+            thisEle.classList.remove("collapse")
+        } else {
+            thisEle.classList.add("collapse")
+        }
+    }
+}
+
+function toggleColor(cb) {
+    var cSearch = document.getElementById("searchColors");
+    var colors = cSearch.value.split(",");
+    var index = colors.indexOf(cb.value);
+    var new_val = "";
+    console.log(index)
+    if (index >= 0) {
+        delete colors[index]
+    } else {
+        colors[colors.length] = cb.value
+    }
+    console.log(colors)
+
+
+    new_val = colors.filter(function (i) {
+        return i != ""
+    }).join(",");
+    console.log(new_val)
+    cSearch.value = new_val.replace(",,", ",").trim()
+}
+
+function returnDrilDown() {
+    document.getElementById("searchResults").classList.remove("collapse");
+    document.getElementById("drillDown").classList.add("collapse");
+    document.getElementById("LoadingShuffle").classList.add("collapse")
+}
+
+//Text Parsing
+function parseBulkSearch() {
+    var raw_val = document.getElementById("bulkEntry").value;
+
+    var raw_cards = raw_val.split("\n")
+    var ez_cards = [];
+    for (i = 0; i < raw_cards.length; i++) {
+        try {
+            console.log(raw_cards[i]);
+            ez_card = raw_cards[i].split(":")
+            ez_cards[i] = {
+                SetCode: ez_card[0],
+                CardNum: ez_card[1]
+            };
+        } catch (e) {
+
+        }
+    }
+    searchEZ(ez_cards);
+}
+
+
+//Table Functions
+function SortTable(field) {
+    //<i class="bi bi-arrow-up"></i>
+    //<i class="bi bi-arrow-down"></i>
+    document.getElementById("sortName").innerHTML = "";
+    document.getElementById("sortSet").innerHTML = "";
+    document.getElementById("sortCN").innerHTML = "";
+    document.getElementById("sortMark").innerHTML = "";
+    document.getElementById("sortLang").innerHTML = "";
+    document.getElementById("sortConfirmed").innerHTML = "";
+    document.getElementById("sortColors").innerHTML = "";
+    document.getElementById("sortType").innerHTML = "";
+
+    var table = document.getElementById("InvTable").getElementsByTagName("tbody")
+
+
+
+}
+
+
+//Stupid Formatting Code
+function reformatCardHeads() {
+    var headers = document.getElementsByClassName("card-header")
+    var max_height = 0;
+    for (i = 0; i < headers.length; i++) {
+        if (headers[i].offsetHeight > max_height) {
+            max_height = headers[i].offsetHeight
+        }
+    }
+    console.log("max header height is " + max_height)
+    for (i = 0; i < headers.length; i++) {
+        headers[i].style["min-height"] = max_height + "px"
+        headers[i].style["height"] = max_height + "px"
+    }
+
+    var headers2 = document.getElementsByClassName("card-body");
+    var max_height2 = 0;
+    for (i = 0; i < headers2.length; i++) {
+        if (headers2[i].offsetHeight > max_height2) {
+            max_height2 = headers2[i].offsetHeight
+        }
+    }
+    console.log("max header height is " + max_height2)
+    for (i = 0; i < headers2.length; i++) {
+        headers2[i].style["min-height"] = max_height2 + "px"
+        headers2[i].style["height"] = max_height2 + "px"
+    }
+}
+
+function updateMarkings(id) {
+    //name: Marks_@mark_id
     //id: none_@mark_id
     var none = document.getElementById("none_" + id + "_mark");
     var foil = document.getElementById("foil_" + id + "_mark");
@@ -41,18 +598,72 @@
     if (pInput.value == "") {
         pInput.value = "-"
     }
-}function ResetMark(id) {    var none = document.getElementById("none_" + id + "_mark");
+}
+
+function ResetMark(id) {
+    var none = document.getElementById("none_" + id + "_mark");
     var foil = document.getElementById("foil_" + id + "_mark");
     var etch = document.getElementById("etched_" + id + "_mark");
     var promo = document.getElementById("promo_" + id + "_mark");
     var plist = document.getElementById("list_" + id + "_mark");
-    var pInput = document.getElementById(id + "_mark");    if (none.checked) {
+    var pInput = document.getElementById(id + "_mark");
+    if (none.checked) {
         foil.checked = false;
         etch.checked = false;
         promo.checked = false;
         plist.checked = false;
     }
-}function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}//Request validationfunction makeid() {    document.getElementById("searchResults").classList.add("collapse")    document.getElementById("LoadingShuffle").classList.remove("collapse")    document.getElementById("SearchResultReportP").innerHTML = "Searching..."    var result = '';    var length = 25;    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';    var charactersLength = characters.length;    for (var i = 0; i < length; i++) {        result += characters.charAt(Math.floor(Math.random() * charactersLength));    }    return result;}function EndRequest() {    var max = 0;    var count = document.getElementsByClassName("invCard").length    document.getElementById("LoadedRows").value = count;    document.getElementById("SearchResultReportP").innerHTML = "Loaded " + count
 }
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+//Request validation
+function makeid() {
+    document.getElementById("searchResults").classList.add("collapse")
+    document.getElementById("LoadingShuffle").classList.remove("collapse")
+    //document.getElementById("SearchResultReportP").innerHTML = "Searching..."
+    document.getElementById("currentlyProcessing").value = true;
+
+    var result = '';
+    var length = 25;
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+function EndRequest() {
+    var count = document.getElementsByClassName("invCard").length
+    document.getElementById("LoadedRows").value = count;
+    reformatCardHeads()
+}
+
+var imgModal = document.getElementById('imageModal')
+imgModal.addEventListener('shown.bs.modal', function (e) {
+})
+
+function imgUpdate(e) {
+    console.log(e)
+    document.getElementById("HighlightImage").src = e.src;
+    document.getElementById("imageModalLabel").innerHTML = e.title
+}
+
+window.addEventListener('scroll', () => {
+    const scrollPosition = window.scrollY;
+    const visibleHeight = window.innerHeight;
+    const totalHeight = document.documentElement.scrollHeight;
+
+    // Check if the user is at the very bottom (within a small tolerance)
+    if (scrollPosition + visibleHeight >= totalHeight - 1) {
+        console.log("Scrolled to the bottom of the page!");
+        var running = document.getElementById("currentlyProcessing").value
+        if (running == "false") {
+            runMiniSearch('Card Details')
+        }
+
+        // You can trigger your desired action here, e.g., load more content
+    }
+});

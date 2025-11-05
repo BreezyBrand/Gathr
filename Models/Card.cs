@@ -25,6 +25,7 @@ namespace CrummyApp.Models
         public string card_faces { get; set; }
         public string prices { get; set; }
         public string image_uris { get; set; }
+        public string oracle_text { get; set; }
 
         public string DisplayName()
         {
@@ -94,16 +95,16 @@ namespace CrummyApp.Models
             this.set = card.set;
             this.collector_number = card.collector_number;
             this.lang = card.lang;            
+            this.name = card.name;                                    
+            this.type_line = card.type_line;
+            this.rarity = card.rarity;            
+            this.alternate_name = card.flavor_name;
+            this.oracle_text = card.oracle_text;
         }
         public void processCardDetails(Card card)
         {
             var imgs = _context.Images.Where(x => x.Id.Equals(card.Id)).ToList();
             this.card_faces = card.card_faces;
-
-            this.name = card.name;                                    
-            this.type_line = card.type_line;
-            this.rarity = card.rarity;            
-            this.alternate_name = card.flavor_name;
             this.prices = _context.Pricing.Find(card.Id);
             this.art = imgs.Any() ? imgs.First() : new CardImages();            
             this.hasArt = imgs.Any();
@@ -148,6 +149,7 @@ namespace CrummyApp.Models
         public string rarity { get; set; }
         public string alternate_name { get; set; }
         public string card_faces { get; set; }
+        public string oracle_text { get; set; }
         //Price Variable
         public PriceOptions prices { get; set; }
         //Art Variables
@@ -214,8 +216,8 @@ namespace CrummyApp.Models
             string priceString = "";
             double out_val;
 
-            double min = 100000;
-            double max = -100000;
+            double min = 10000000;
+            double max = -10000000;
 
             //usd
             double.TryParse(prices.usd, out out_val);
@@ -241,6 +243,12 @@ namespace CrummyApp.Models
                 min = Math.Min(min, out_val);
                 max = Math.Max(max, out_val);
             }
+
+            if(min.Equals(10000000) || max.Equals(-10000000))
+            {
+                return "";
+            }
+
             if (min.Equals(max))
             {
                 priceString = String.Format(CultureInfo.CurrentCulture, "{0:C}", min);

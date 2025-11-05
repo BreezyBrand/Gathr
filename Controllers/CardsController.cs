@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using CrummyApp.Data;
 using CrummyApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
@@ -25,62 +26,48 @@ namespace CrummyApp.Controllers
         }
 
         //Functions
-        private List<Card> searchCards(string? set_code, string lang_code = "EN", string card_num = "", string tags = "")
+        private List<Card> searchCards(SearchOptions sOpts)
         {
             List<Card> cards = _context.Cards.ToList();
-            //Search if both set and number are available
-            if (!set_code.IsNullOrEmpty())
-            {
-                List<string> setList = set_code.ToLower().Split(",").ToList();
-                cards = cards.Where(x => setList.Contains(x.set)).ToList();
-            }
-
-            if (!card_num.IsNullOrEmpty())
-            {
-                cards = cards.Where(x => x.collector_number.Equals(card_num)).ToList();
-            }
-
-            if (!lang_code.Equals("ALL"))
-            {
-                cards = cards.Where(x => x.lang.Equals(lang_code.ToLower())).ToList();
-            }
-
-            if (!tags.IsNullOrEmpty())
-            {
-                List<string> tagList = tags.ToLower().Split(",").ToList();
-                
-                //Check Inventory
-                List<int> InvIds = _context.InvTags.Where(x => tagList.Contains(x.tagName)).Select(n=> n.invId).ToList();
-                List<string> CardIds = _context.Inventory.Where(x => InvIds.Contains(x.Id)).Select(n=>n.Card_Id).ToList();
-                
-                //Check Cards (COMING SOON)
-                cards = cards.Where(x => CardIds.Contains(x.Id)).ToList();
-            }
-
-            return cards;            
+            return sOpts.MatchedCards(cards, _context);
         }
-        private List<CardView> processCards(List<Card> cards, int skip = 0)
+        //REVISIT - Need to change how values are passed between search blocks, searching 0-50 may return no matches, which
+        //is currently tricking the displays to act as if there are no other matches to load
+        //however, if searching for all cards in books, the total number of matches would exceed the maxSingleLoad
+        //So we say 50 is the max, but then we've checked 200 cards to get to 50 that match - the current skip logic would say
+        //we need to start at 50 - which would then match everything between 50-200 again and that could end at any value above 200
+        private List<CardView> processCards(List<Card> cards, SearchOptions sOpt)
         {
             int maxSingleLoad = _config.GetSection("MaxSingleLoad").Get<int>();
-            
-            List<CardView> sortedCards = new List<CardView>();            
+            List<CardView> sortedCards = new List<CardView>();
             foreach (var card in cards.OrderBy(n => n.collector_number))
             {
                 CardView thisCard = new CardView(_context);
                 thisCard.SetSortOrder(card);
                 sortedCards.Add(thisCard);
             }
-            sortedCards = sortedCards.OrderBy(n => n.set).ThenBy(n => n.SortOrder).Skip(skip).Take(maxSingleLoad).ToList();
-            ViewData["MaxResults"] = sortedCards.Count();
-            
+            sortedCards = sortedCards.OrderBy(n => n.set).ThenBy(n => n.SortOrder).Skip(sOpt.skip).ToList();                        
             List<CardView> processedCards = new List<CardView>();
+            int count = 0;
             foreach (var card in sortedCards)
-            {                
+            {                                
                 card.processCardDetails(card.CardObj);
-                processedCards.Add(card);
+                if (card.in_inventory && !sOpt.location.IsNullOrEmpty())
+                {
+                    if (sOpt.MatchInventory(card))
+                    {
+                        processedCards.Add(card);
+                    };
+                } else
+                {
+                    processedCards.Add(card);
+                }
+                if (processedCards.Count().Equals(maxSingleLoad) && sOpt.limit)
+                {
+                    break;
+                }
             }
-
-            return processedCards.ToList();
+            return sOpt.MatchedInventory(processedCards).Take(maxSingleLoad).ToList();
         }
         private List<Card> getCardsByName(string name)
         {
@@ -91,23 +78,36 @@ namespace CrummyApp.Controllers
             return cards;
         }
         //GET Endpoints
-        public PartialViewResult CardDetails(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
+        //public PartialViewResult CardDetails(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
+        public PartialViewResult CardDetails([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
         {
-            List<Card> cards = searchCards(set_code, lang_code, card_num, tags);
-            List<CardView> processedCards = processCards(cards,skip);
-            return PartialView("_CardDetails", processedCards.ToList());
+            ReturnRequest rReq = new ReturnRequest();                      
+            rReq.Initialize(sOpts,_config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.GetCards(_context);            
+            return PartialView("_CardDetails", rReq);
         }
-        public PartialViewResult GetBulk(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
+        public PartialViewResult GetBulk([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
         {
-            List<Card> cards = searchCards(set_code, lang_code, card_num, tags);
-            List<CardView> processedCards = processCards(cards, skip);
-            return PartialView("_Bulk", processedCards.ToList());
+            ReturnRequest rReq = new ReturnRequest();                      
+            rReq.Initialize(sOpts,_config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.sOpt.limit = false;
+            rReq.returnLimit = 2000;
+            rReq.GetCards(_context);            
+            return PartialView("_Bulk", rReq);
         }
-        public PartialViewResult GetInventory(string? set_code, string lang_code = "EN", string card_num = "", string tags = "",int skip = 0)
+        public PartialViewResult GetInventory([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
         {
-            List<Card> cards = searchCards(set_code, lang_code, card_num, tags);
-            List<CardView> processedCards = processCards(cards,skip);
-            return PartialView("_Inventory", processedCards.ToList());
+            ReturnRequest rReq = new ReturnRequest();                      
+            rReq.Initialize(sOpts,_config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.GetCards(_context);            
+            if (sOpts.skip > 0)
+            {
+                return PartialView("_InventoryRows", rReq);
+            }
+            else
+            {
+                return PartialView("_Inventory", rReq);
+            }
         }
         public PartialViewResult EZSearch(string raw_cards)
         {
@@ -122,42 +122,52 @@ namespace CrummyApp.Controllers
                 };
                 ezCards.Add(ez);
             }
-
+            List<string> quickSets = ezCards.Select(n => n.SetCode.ToUpper()).ToList();
             List<Card> cards = new List<Card>();
+            List<Card> allCards = _context.Cards.Where(x=>quickSets.Contains(x.set.ToUpper())).ToList();
             foreach (var ezCard in ezCards)
             {
                 if (!ezCard.SetCode.IsNullOrEmpty() && !ezCard.CardNum.IsNullOrEmpty())
                 {
-                    List<Card> matchedCards = _context.Cards.Where(x =>
+                    List<Card> matchedCards = allCards.Where(x =>
                                 x.set.Equals(ezCard.SetCode)
                                 && x.collector_number.Equals(ezCard.CardNum)
                             ).ToList();
 
-                    if(matchedCards.Where(x => x.lang.ToUpper().Equals("EN")).Any())
+                    if (matchedCards.Where(x => x.lang.ToUpper().Equals("EN")).Any())
                     {
                         cards.Add(
                             matchedCards.Where(x => x.lang.ToUpper().Equals("EN")).First()
                         );
-                    } else
+                    }
+                    else
                     {
                         cards.Add(
                             matchedCards.First()
                         );
                     }
 
-                    
+
                 }
             }
+            SearchOptions sOpt = new SearchOptions()
+            {
+                limit = false,
+                skip = 0
+            };
 
-            List<CardView> processedCards = processCards(cards);
-            return PartialView("_CardDetails", processedCards);
+            ReturnRequest rReq = new ReturnRequest();                      
+            rReq.Initialize(sOpt,_config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.SetCards(_context, cards.Distinct().ToList());
+            //List<CardView> processedCards = processCards(cards,sOpt);
+            return PartialView("_CardDetails", rReq);
         }
-        public PartialViewResult TransactionLog(string? set_code, string lang_code = "EN", string card_num = "")
+        public PartialViewResult TransactionLog([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
         {
             List<Transaction> log;
-            if (!set_code.IsNullOrEmpty() || !card_num.IsNullOrEmpty())
+            if (!sOpts.set_code.IsNullOrEmpty() || !sOpts.card_num.IsNullOrEmpty())
             {
-                List<Card> cards = searchCards(set_code, lang_code, card_num);
+                List<Card> cards = searchCards(sOpts);
                 List<string> cardIDs = cards.Select(n => n.Id).ToList();
                 log = _context.Transactions.Where(x => cardIDs.Contains(x.Card_Id)).ToList();
             }
@@ -172,7 +182,12 @@ namespace CrummyApp.Controllers
         public PartialViewResult AllCardsByName(string name)
         {
             List<Card> cards = getCardsByName(name);
-            List<CardView> processedCards = processCards(cards);
+            SearchOptions sOpt = new SearchOptions()
+            {
+                limit = false,
+                skip = 0
+            };
+            List<CardView> processedCards = processCards(cards, sOpt);
             return PartialView("_Inventory", processedCards.ToList());
         }
         //POST Endpoints
@@ -286,7 +301,7 @@ namespace CrummyApp.Controllers
         }
         public string UpdateCardArt(string id, [Bind("small,normal,large,png,art_crop,border_crop")] CardImages imgs)
         {
-            if(_context.Images.Where(x => x.Id.Equals(id)).Any())
+            if (_context.Images.Where(x => x.Id.Equals(id)).Any())
             {
                 CardImages oldImg = _context.Images.Where(x => x.Id.Equals(id)).First();
 
@@ -298,7 +313,8 @@ namespace CrummyApp.Controllers
                 oldImg.border_crop = imgs.small;
                 _context.Images.Update(oldImg);
 
-            } else
+            }
+            else
             {
                 imgs.Id = id;
                 _context.Images.Add(imgs);
@@ -306,6 +322,39 @@ namespace CrummyApp.Controllers
             _context.SaveChanges();
 
             return "Updated";
+        }
+
+        public int UpdateBulk(string CardId, string mark, int newCount,string loc = "Bulk Entry", string lang = "EN")
+        {
+            List<InvOptions> invCards = _context.Inventory.Where(x => x.Card_Id.Equals(CardId)).ToList();
+            //For debugging, leave above
+            invCards = invCards.Where(x => x.Mark.Contains(mark)).ToList();
+            
+            if(newCount < invCards.Count())
+            {
+                List<InvOptions> bulkEntryCards = invCards.Where(x => x.Location.Equals("Bulk Entry")).ToList();
+                if (bulkEntryCards.Any())
+                {
+                    _context.Inventory.Remove(bulkEntryCards.Last());
+                } else {
+                    return invCards.Count();
+                }
+            } else
+            {
+                InvOptions newCard = new InvOptions()
+                {
+                    Card_Id = CardId,
+                    Language = lang,
+                    Location = loc,
+                    Mark = mark,
+                    UpdateUser = Environment.MachineName,
+                    confirmed_date = DateTime.Now,
+                    _confirmed = true
+                };
+                _context.Inventory.Add(newCard);
+            }
+            _context.SaveChanges();
+            return 0;
         }
         //Tracking Details
         private string CompareInventory(InvOptions old, tempInv inv)
