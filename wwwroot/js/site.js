@@ -519,19 +519,16 @@ function CreateNewLocType(src) {
     console.log(SubmitData)
 }
 function CreateNewLocation(src, type, inpId) {
+
     var SubmitData = {
         Name: document.getElementById(inpId).value,
         Type: type,
-        tier: 1,
+        tier: 2,
         Count: 0
     }
     document.getElementById(inpId).value = "";
 
     console.log(SubmitData)
-}
-
-function CreateNewLocation(src, type, inpId) {
-    document.getElementById(inpId).value
 }
 //Display
 function toggleSearch(toggleType) {
