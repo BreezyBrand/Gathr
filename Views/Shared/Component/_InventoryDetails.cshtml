@@ -34,12 +34,12 @@
                             <span id="@inv.Id">@inv.Id</span>
                         </td>
                         <td style="min-width:75px">
-                            <partial name="_Mark" model="inv" />
+                            <partial name="Component/_Mark" model="inv" />
                         </td>
                         <td>
                             @*<input class="form-control" id="@lan_id" value="@inv.Language" />*@
                             <select class="form-control" id="@lan_id" value="@inv.Language">
-                                <partial name="_Language" />
+                                <partial name="Component/_Language" />
                             </select>
                         </td>
                         <td>

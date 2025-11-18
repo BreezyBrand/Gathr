@@ -80,6 +80,7 @@ namespace CrummyApp.Models
                     cards = cards.Where(x => x.type_line.Contains(tp)).ToList();
                 }
             }
+            
             if (!lang_code.IsNullOrEmpty())
             {
                 if (!lang_code.Equals("ALL"))
@@ -115,6 +116,7 @@ namespace CrummyApp.Models
         
         public bool MatchInventory(CardView card)
         {
+            //Semantic Matching
             List<string> locString = location.ToLower().Split(" ").ToList();
             return card.inventory.Where(n => n.Location.ToLower().Split(" ").Intersect(locString).Any()).Any();                
         }

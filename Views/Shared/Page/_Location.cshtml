@@ -1,0 +1,56 @@
+﻿@model ReturnRequest
+@inject IConfiguration config;
+
+@{
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
+    int singleLoad = config.GetSection("MaxSingleLoad").Get<Int32>();
+}
+@*Locations*@        
+@if (Model.Locations.Any())
+{
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8">
+                <h4>
+                    <span>Location</span>
+                </h4>
+            </div>
+            <div class="col-4 text-end">
+                <input id="NewLocTypeInput" placeholder="Add New Type..." />
+                <button onclick="CreateNewLocType(this)">+</button>
+            </div>
+        </div>
+        <hr />
+        <div class="row g-2">
+            @foreach (var locType in Model.Locations.Where(x=>x.tier.Equals(1)).OrderBy(x => x.Type).Select(x => x.Type).Distinct().ToList())
+            {
+                <div class="col-8 text-center">
+                    <p class="fw-bolder" style="font-size:16pt;">@locType</p>
+                </div>
+                <div class="col-4 text-end">
+                    <input id="NewLoc_@locType" placeholder="Add New @locType..." />
+                    <button onclick="CreateNewLocation(this,'@locType','NewLoc_@locType')">+</button>
+                </div>
+                <hr />
+                @foreach (var loc in Model.Locations.Where(x => x.Type.Equals(locType) && x.tier>1).OrderBy(x => x.Name))
+                {
+                    if (loc.Count > 0)
+                    {
+                        <div class="col-2 small">
+                            <button style="font-size:10pt" class="btn btn-secondary w-100" onclick="ToggleLocationId(this,@loc.Id,'@loc.Name','@loc.Type')">
+                                @loc.Name (@loc.Count)
+                            </button>
+                        </div>
+                    }
+                }
+                <hr />
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        <h4>No Cards found with Locations</h4>
+    </div>
+}

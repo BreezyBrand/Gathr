@@ -22,11 +22,15 @@ function getSearchTerms() {
     const tags = document.getElementById("searchTag").value;
     const colors = document.getElementById("searchColors").value;
     const oracle = document.getElementById("searchOracle").value;
-    const location = document.getElementById("searchLoc").value;
-    const typeLines = "";
-    const valid = (searchName == "" && set_code == "" && card_num == "" && lang_code == "" && tags == "")
+    var location = document.getElementById("searchLoc").value;
+    const typeLines = document.getElementById("searchTypeLine").value;
+    const toggleType = document.getElementById("toggleType").value;
 
-    const searchData = {
+    if (location == "") {
+        location = "Any"
+    }
+
+    var searchData = {
         name: searchName,
         set_code: set_code,
         card_num: card_num,
@@ -37,8 +41,21 @@ function getSearchTerms() {
         types: typeLines,
         oracle: oracle,
         skip: 0,
-        isValid: valid
+        isValid: true,
+        toggleType: toggleType
     }
+
+    const ck1 = (searchName != "" && set_code != "" && card_num != "" && lang_code != "" && tags != "")
+    var ck2 = false;
+    if (toggleType == "location") {
+        ck2 = true
+    } else {
+        ck2 = (location != "Any")
+    }
+
+    const valid = (ck1 || ck2)
+    searchData["isValid"] = valid;
+
     console.log(searchData)
     return searchData;
 }
@@ -48,16 +65,16 @@ function runSearch() {
     lastRequestId = makeid();
     var RequestId = lastRequestId;
     var searchData = getSearchTerms()
-    const toggleType = document.getElementById("toggleType").value;
 
-    console.log("Searching...")
-    if (searchData["isValid"]) {
+    if (!searchData["isValid"]) {
+        document.getElementById("searchResults").innerHTML = "";
         document.getElementById("searchResults").classList.remove("collapse");
         document.getElementById("LoadingShuffle").classList.add("collapse");
         return;
     }
 
-    if (toggleType == "database") {
+    if (searchData["toggleType"] == "database") {
+        console.log("Searching full database...")
         $.ajax({
             url: "Cards/CardDetails",
             data: searchData,
@@ -75,7 +92,8 @@ function runSearch() {
             }
         })
     }
-    else if (toggleType == "bulk") {
+    else if (searchData["toggleType"] == "bulk") {
+        console.log("Searching for bulk entry...")
         $.ajax({
             url: "Cards/GetBulk",
             data: searchData,
@@ -93,7 +111,27 @@ function runSearch() {
             }
         })
     }
-    else if (toggleType == "inventory") {
+    else if (searchData["toggleType"] == "location") {
+        console.log("Searching by locations...")
+        $.ajax({
+            url: "Cards/GetLocations",
+            data: searchData,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    document.getElementById("locationFilter").innerHTML = result;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+                    toggleInventory();
+                    EndRequest()
+                }
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        })
+    }
+    else if (searchData["toggleType"] == "inventory") {
+        console.log("Searching inventory...")
         $.ajax({
             url: "Cards/GetInventory",
             data: searchData,
@@ -256,7 +294,62 @@ function getTransactions() {
         }
     })
 }
+function ToggleLocationId(src, id, name, type) {
+    var dir = "";
+    if (src.classList.contains("btn-secondary")) {
+        //Add cards
+        dir = "add";
+        src.classList.toggle("btn-secondary")
+        src.classList.toggle("btn-primary")
+    } else {
+        //Remove cards
+        dir = "rem";
+        src.classList.toggle("btn-secondary")
+        src.classList.toggle("btn-primary")
+    }
 
+    var searchData = getSearchTerms()
+    searchData["LocationId"] = id;
+    if (searchData["toggleType"] == "location") {
+        if (dir == "add") {
+            $.ajax({
+                url: "Cards/GetCardsByLocation",
+                data: searchData,
+                success: function (result) {
+                    var newHtml = "<div id='searchQueryLocation" +
+                        id +
+                        "'><h4 class='w-100'>" +
+                        type + " - " + name +
+                        "</h4>" +
+                        result +
+                        "</div>";
+                    document.getElementById("searchResults").innerHTML += newHtml;
+                    document.getElementById("searchResults").classList.remove("collapse");
+                    document.getElementById("LoadingShuffle").classList.add("collapse");
+                    toggleInventory();
+                    EndRequest();
+                },
+                error: function (result) {
+                    console.log(result)
+                }
+            })
+        }
+        else {
+            document.getElementById("searchQueryLocation" + id).remove();
+        }
+    } else {
+        var locationNames = document.getElementById("searchLoc").value.split(",");
+        document.getElementById("searchLoc").value = ""
+        if (dir == "add") {
+            locationNames[locationNames.length] = type + " - " + name;
+        }
+        else {
+            locationNames.splice(locationNames.indexOf(type + " - " + name), 1);
+        }
+        document.getElementById("searchLoc").value = cleanJoin(locationNames.filter(onlyUnique))
+        runSearch()
+    }
+}
 //POST
 function AddCard(id) {
     console.log(id)
@@ -411,6 +504,16 @@ function updateBulk(sInput, cardID, mark) {
 
 
 }
+function CreateNewLocType(src) {
+    var SubmitData = {
+        document.getElementById("NewLocTypeInput").value
+    }
+
+
+}
+function CreateNewLocation(src, type, inpId) {
+    document.getElementById(inpId).value
+}
 //Display
 function toggleSearch(toggleType) {
     document.getElementById("toggleType").value = toggleType;
@@ -509,8 +612,19 @@ function parseBulkSearch() {
     }
     searchEZ(ez_cards);
 }
-
-
+function onlyUnique(value, index, array) {
+    return array.indexOf(value) === index;
+}
+function cleanJoin(array) {
+    var val = "";
+    for (i = 0; i < array.length; i++) {
+        if (array[i] != "") {
+            val += array[i] + ","
+        }
+    }
+    console.log(val.slice(0, -1));
+    return val.slice(0, -1);
+}
 //Table Functions
 function SortTable(field) {
     //<i class="bi bi-arrow-up"></i>
@@ -639,6 +753,7 @@ function EndRequest() {
     var count = document.getElementsByClassName("invCard").length
     document.getElementById("LoadedRows").value = count;
     reformatCardHeads()
+    document.getElementById("currentlyProcessing").value = false;
 }
 
 var imgModal = document.getElementById('imageModal')

@@ -22,6 +22,33 @@
 
 --DELETE FROM InventoryV2
 
+INSERT INTO Locations ([type],[name]) VALUES
+('Book','Masters'),
+('Book','2020-2021'),
+('Book','Old'),
+('Book','Specials'),
+('Deck','Undefined'),
+('Book','SLD'),
+('Book','2015-2019'),
+('Book','2022'),
+('Book','2024'),
+('Book','Base Sets'),
+('Book','Remasters'),
+('Book','Specials'),
+('Book','Special'),
+('Book','2025'),
+('Other','Drawer'),
+('Other','Undefined'),
+('Book','UB'),
+('Book','2023'),
+('Book','Random'),
+('Book','D&D'),
+('Book','Assorted'),
+('Other','Clue Box'),
+('Book','Lands'),
+('Other','New'),
+('Other','Jumpstart Box');
+
 --EXEC InsertCard @Id='', @Mark='',@Lang='', @Location='', @Confirmed='', @QTY=1;
 EXEC InsertCard @Id='c9c17e3b-4d7f-4472-afe1-8e9358b82f2c', @Mark='-',@Lang='EN', @Location='Deck', @Confirmed=1, @QTY=1;
 EXEC InsertCard @Id='ea9edff0-58a8-405d-9f2e-39f8269bbcb2', @Mark='-',@Lang='EN', @Location='Book - Old', @Confirmed=1, @QTY=1;

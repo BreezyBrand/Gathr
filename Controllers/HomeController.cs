@@ -11,19 +11,21 @@ namespace CrummyApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationContext _context;
+        private readonly IConfiguration _config;
 
-        public HomeController(ApplicationContext context, ILogger<HomeController> logger)
+        public HomeController(ApplicationContext context, ILogger<HomeController> logger, IConfiguration config)
         {
             _logger = logger;
             _context = context;
+            _config = config;
         }
 
         public IActionResult Index()
         {
-            List<CardImages> imgs = _context.Images.OrderBy(n => Guid.NewGuid()).Take(3).ToList();
-            
-            
-            return View(imgs);
+            ReturnRequest rReq = new ReturnRequest();                      
+            rReq.Initialize(new SearchOptions(),_config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.GetLocations(_context);                          
+            return View(rReq);
         }
 
         public IActionResult RestoreImages()
@@ -113,6 +115,17 @@ namespace CrummyApp.Controllers
             //return View(preCard);
         }
 
+        public IActionResult RecountInv()
+        {
+            var locations = _context.Locations.ToList();            
+            foreach(var loc in locations)
+            {
+                loc.Count = _context.Inventory.Where(x => x.Location.Contains(loc.Name)).Count();
+                _context.Locations.Update(loc); 
+            }
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
         public IActionResult Privacy()
         {
             return View();

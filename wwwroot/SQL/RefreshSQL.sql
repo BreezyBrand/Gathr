@@ -27,6 +27,13 @@ CREATE TABLE [dbo].[InvTags]
 	tagNAme VARCHAR(100) NOT NULL
 )
 
+CREATE TABLE [dbo].[Locations]
+(
+	[Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	[Name] VARCHAR(255) NOT NULL,
+	[Type] VARCHAR(100) NOT NULL
+)
+
 CREATE TABLE [dbo].[PriceHistory] (
     [CardId]      VARCHAR (250) NOT NULL,
     [usd]         VARCHAR (10)  NULL,

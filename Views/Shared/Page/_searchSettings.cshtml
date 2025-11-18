@@ -1,4 +1,6 @@
-﻿<div id="searchBar" class="container">
+﻿@model ReturnRequest
+
+<div id="searchBar" class="container">
     <div class="row">
         <div class="col-12 pb-3 text-end">
             <button class="btn btn-primary" onclick="toggleAdvancedOptions(this)">Show Advanced Options</button>
@@ -26,7 +28,7 @@
                     <option value="">--- Pick a Language ---</option>
                     <option value="ALL">Any</option>
                 </optgroup>
-                <partial name="_Language" />
+                <partial name="Component/_Language" />
             </select>
         </div>
         <div class="col-3 AdvSearch collapse">
@@ -37,7 +39,7 @@
             <label class="form-label fw-bold">Oracle</label>
             <input onchange="runSearch()" class="form-control" id="searchOracle" />
         </div>
-        <div class="col-3 AdvSearch collapse">
+        <div class="col-3 collapse">
             <label class="form-label fw-bold">Location</label>
             <input onchange="runSearch()" class="form-control" id="searchLoc" />
         </div>
@@ -87,12 +89,16 @@
             <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" checked />
             <label for=" toggleNotInv">Not In Inventory</label>
         </div>
+        <div class="col-12 AdvSearch collapse" id="locationFilter">
+            <partial name="Page/_Location" model="@Model"/>
+        </div>
+
         <div id="SearchResultsReport" class="col-12">
             <input id="LoadedRows" class="collapse" value="0" />
             <input id="currentlyProcessing" class="collapse" value="false" />
             <p id="SearchResultsText">No Results</p>
         </div>
-    </div>
+    </div>    
     <div class="row collapse" id="MassEntry">
         <div class="col-12">
             <label class="form-label fw-bold">Mass Entry</label>

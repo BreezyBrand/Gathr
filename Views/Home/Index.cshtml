@@ -1,4 +1,4 @@
-﻿@model List<CardImages>
+﻿@model ReturnRequest
 @inject IConfiguration config;
 @{
     ViewData["Title"] = "Home";
@@ -14,10 +14,13 @@
         <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventorySearch" type="button" role="tab" aria-controls="inventorySearch" aria-selected="false" onclick="toggleSearch('inventory')">Inventory</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulkSet" type="button" role="tab" aria-controls="bulkSet" aria-selected="false" onclick="toggleSearch('bulk')">Bulk Entry</button>
+        <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#locationSearch" type="button" role="tab" aria-controls="bulkSet" aria-selected="false" onclick="toggleSearch('location')">Location</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#transactionLog" type="button" role="tab" aria-controls="transactionLog" aria-selected="false" onclick="getTransactions()">Transactions</button>
+        <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulkSet" type="button" role="tab" aria-controls="bulkSet" aria-selected="false" onclick="toggleSearch('bulk')">Bulk Entry</button>
+    </li>    
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="transactionLog" data-bs-toggle="tab" data-bs-target="#transactionLog" type="button" role="tab" aria-controls="transactionLog" aria-selected="false" onclick="getTransactions()">Transactions</button>
     </li>
 </ul>
 <br />
@@ -28,13 +31,16 @@
     <div id="inventorySearch" class="container tab-pane fade" role="tabpanel" aria-labelledby="inventory-tab" tabindex="1">
         <h4>Inventory</h4>
     </div>
+    <div id="locationSearch" class="container tab-pane fade" role="tabpanel" aria-labelledby="location-tab" tabindex="1">
+        <h4>Location</h4>
+    </div>
     <div id="bulkSet" class="container tab-pane fade" role="tabpanel" aria-labelledby="bulk-tab" tabindex="2">
         <h4>Bulk Entry</h4>
     </div>
     <div id="transactionLog" class="container tab-pane fade" role="tabpanel" aria-labelledby="transactionLog" tabindex="3">
         <h4>Recent Transactions</h4>
     </div>
-    <partial name="_searchSettings" />    
+    <partial name="Page/_searchSettings" model="@Model"/>
 </div>
 
 <div id="searchResults" class="container">

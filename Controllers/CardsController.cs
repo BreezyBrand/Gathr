@@ -84,7 +84,16 @@ namespace CrummyApp.Controllers
             ReturnRequest rReq = new ReturnRequest();                      
             rReq.Initialize(sOpts,_config.GetSection("MaxSingleLoad").Get<int>());
             rReq.GetCards(_context);            
-            return PartialView("_CardDetails", rReq);
+            return PartialView("Page/_CardDetails", rReq);
+        }
+        public PartialViewResult GetLocations([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
+        {
+            ReturnRequest rReq = new ReturnRequest();                      
+            rReq.Initialize(sOpts,_config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.GetLocations(_context);
+            //rReq.GetCards(_context);            
+
+            return PartialView("Page/_Location", rReq);
         }
         public PartialViewResult GetBulk([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
         {
@@ -93,7 +102,7 @@ namespace CrummyApp.Controllers
             rReq.sOpt.limit = false;
             rReq.returnLimit = 2000;
             rReq.GetCards(_context);            
-            return PartialView("_Bulk", rReq);
+            return PartialView("Page/_Bulk", rReq);
         }
         public PartialViewResult GetInventory([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
         {
@@ -102,11 +111,11 @@ namespace CrummyApp.Controllers
             rReq.GetCards(_context);            
             if (sOpts.skip > 0)
             {
-                return PartialView("_InventoryRows", rReq);
+                return PartialView("Component/_InventoryRows", rReq);
             }
             else
             {
-                return PartialView("_Inventory", rReq);
+                return PartialView("Page/_Inventory", rReq);
             }
         }
         public PartialViewResult EZSearch(string raw_cards)
@@ -176,9 +185,8 @@ namespace CrummyApp.Controllers
                 log = _context.Transactions.ToList();
             }
 
-            return PartialView("_Transactions", log.OrderByDescending(n => n.TransactionDate).ToList());
-        }
-
+            return PartialView("Page/_Transactions", log.OrderByDescending(n => n.TransactionDate).ToList());
+        }        
         public PartialViewResult AllCardsByName(string name)
         {
             List<Card> cards = getCardsByName(name);
@@ -189,6 +197,17 @@ namespace CrummyApp.Controllers
             };
             List<CardView> processedCards = processCards(cards, sOpt);
             return PartialView("_Inventory", processedCards.ToList());
+        }
+        public PartialViewResult GetCardsByLocation([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts, int LocationId)
+        {
+            CardLocation Location = _context.Locations.Find(LocationId);
+            var InvByLoc = _context.Inventory.Where(x => x.Location.Contains(Location.Name));
+            var matchedCards = InvByLoc.Select(x => x.Card_Id).ToList();
+            var rawCards = _context.Cards.Where(x => matchedCards.Contains(x.Id)).ToList();
+            ReturnRequest rReq = new ReturnRequest();
+            rReq.Initialize(sOpts,InvByLoc.Count());
+            rReq.SetCards(_context,rawCards);        
+            return PartialView("Page/_CardDetails", rReq);
         }
         //POST Endpoints
         public PartialViewResult AddToInventory(string card_id)
@@ -218,7 +237,7 @@ namespace CrummyApp.Controllers
             //Reset view
             CardView thisCard = new CardView(_context);
             thisCard.processCardDetails(card);
-            return PartialView("_InventoryDetails", thisCard.inventory);
+            return PartialView("Component/_InventoryDetails", thisCard.inventory);
         }
         public PartialViewResult UpdateInventory([Bind("Card_Id,confirmed_date,Id,Language,Location,Mark,_confirmed")] tempInv inv)
         {
@@ -248,7 +267,7 @@ namespace CrummyApp.Controllers
             //Reset view
             CardView thisCard = new CardView(_context);
             thisCard.processCardDetails(card);
-            return PartialView("_InventoryDetails", thisCard.inventory);
+            return PartialView("Component/_InventoryDetails", thisCard.inventory);
         }
         public CardView CloneInventory([Bind("Card_Id,confirmed_date,Id,Language,Location,Mark,_confirmed")] InvOptions inv)
         {
@@ -297,7 +316,7 @@ namespace CrummyApp.Controllers
             //Reset view
             CardView thisCard = new CardView(_context);
             thisCard.processCardDetails(card);
-            return PartialView("_InventoryDetails", thisCard.inventory);
+            return PartialView("Component/_InventoryDetails", thisCard.inventory);
         }
         public string UpdateCardArt(string id, [Bind("small,normal,large,png,art_crop,border_crop")] CardImages imgs)
         {
