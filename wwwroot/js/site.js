@@ -504,13 +504,32 @@ function updateBulk(sInput, cardID, mark) {
 
 
 }
+
 function CreateNewLocType(src) {
+    var name = document.getElementById("NewLocTypeInput").value
+
     var SubmitData = {
-        document.getElementById("NewLocTypeInput").value
+        Name: name,
+        Type: name,
+        tier: 1,
+        Count: 0
     }
+    document.getElementById("NewLocTypeInput").value = "";
 
-
+    console.log(SubmitData)
 }
+function CreateNewLocation(src, type, inpId) {
+    var SubmitData = {
+        Name: document.getElementById(inpId).value,
+        Type: type,
+        tier: 1,
+        Count: 0
+    }
+    document.getElementById(inpId).value = "";
+
+    console.log(SubmitData)
+}
+
 function CreateNewLocation(src, type, inpId) {
     document.getElementById(inpId).value
 }
