@@ -72,9 +72,16 @@
                         </p>
                     </div>
                     <div class="col-12">
-                        <p>
-                            <strong>Oracle Text:</strong><br />
-                            @card.oracle_text
+                        <p onclick="ToggleOracleText(this)">
+                            <strong>Oracle Text:</strong>
+                            <span class="collapse small w-100">
+                                <br />
+                                @card.oracle_text
+                            </span>
+                            <span class="fauxPointer small w-100">
+                                <br />
+                                (Show)
+                            </span>
                         </p>
                     </div>
                 </div>

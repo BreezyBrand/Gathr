@@ -14,6 +14,7 @@ namespace CrummyApp.Models
         public int max_matches { get; set; }
         public int LastProcessed { get; set; }
         public int returnLimit { get; set; }
+        public bool OnlyMatches { get; set; }
         public void Initialize(SearchOptions opt, int lim)
         {
             rawCards = new List<Card>();
@@ -34,6 +35,7 @@ namespace CrummyApp.Models
         public void SetCards(ApplicationContext context, List<Card> cards)
         {
             rawCards = cards;
+            max_matches = cards.Count();
             processCards(context);
         }
 
@@ -45,7 +47,7 @@ namespace CrummyApp.Models
         private void processCards(ApplicationContext context)
         {
             //Prefilter if any of the results are in the selected locations
-            if (!sOpt.location.IsNullOrEmpty())
+            if (!sOpt.location.Equals("Any"))
             {
                 var markedLocations = sOpt.location.Split(',');
                 List<string> matchedCardIds = new List<string>();
@@ -79,11 +81,12 @@ namespace CrummyApp.Models
             //Process the remaining cards
             List<CardView> processedCards = new List<CardView>();
             int count = 0;
+            max_matches = sortedCards.Count();
             foreach (var card in sortedCards.Skip(sOpt.skip))
             {
                 if (Cards.Count() < returnLimit)
                 {
-                    LastProcessed = sortedCards.IndexOf(card);
+                    LastProcessed = sortedCards.IndexOf(card)+1;
                     Debug.Write("Processing card " + LastProcessed.ToString());
                     card.processCardDetails(card.CardObj);
                     if (!sOpt.location.Equals("Any"))
@@ -104,6 +107,8 @@ namespace CrummyApp.Models
                     break;
                 }
             }
+
+            
         }
 
         public void GetLocations(ApplicationContext context)

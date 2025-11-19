@@ -22,4 +22,11 @@
     <Folder Include="wwwroot\Uploads\Spreadsheets\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Views\Shared\Page\_Toast.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

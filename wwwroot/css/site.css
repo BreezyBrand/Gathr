@@ -35,8 +35,12 @@ body {
     height: 100px;
 }
 
-.imgClick{
-    cursor:pointer;
+.imgClick, .fauxPointer, .cSelect{
+    cursor: pointer;
+}
+
+.no-click{
+    cursor:not-allowed;
 }
 
 .ani-card {
@@ -48,8 +52,8 @@ body {
     background-color: #b3704d;
     background-image: url("../imgback.jpg");
     background-size: 103%;
-    background-position:center;
-    background-repeat:no-repeat;
+    background-position: center;
+    background-repeat: no-repeat;
     background-color: lavender;
     position: absolute;
     top: 0;

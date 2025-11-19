@@ -1,1 +1,11 @@
-﻿@model List<string>
+﻿@model ReturnRequest
+
+@foreach (var OptG in Model.Locations.Where(x => x.Tier.Equals(1)).OrderBy(x => x.Name))
+{
+    <ul>
+        @foreach (var Opt in Model.Locations.Where(x => x.Type.Equals(OptG.Name)))
+        {
+            <li>@Opt.Name</li>
+        }
+    </ul>
+}

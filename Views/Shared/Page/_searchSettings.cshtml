@@ -1,110 +1,318 @@
 ﻿@model ReturnRequest
+@{
+    bool display = true;
+}
 
-<div id="searchBar" class="container">
-    <div class="row">
-        <div class="col-12 pb-3 text-end">
-            <button class="btn btn-primary" onclick="toggleAdvancedOptions(this)">Show Advanced Options</button>
-            <button class="btn btn-secondary" onclick="toggleMassEntry()">Batch Search Settings</button>
+
+@*New/Modified*@
+@if (display)
+{
+    <style>
+        .input-group-text {
+            min-width: 95px;
+        }
+
+        .input-group-text-override {
+            min-width: 0px;
+        }
+    </style>
+
+    <div id="searchBar" class="container">
+        <div class="col-12 col-sm-12">
+            <p>Filters</p>
+            <input class="form-control collapse" id="toggleType" value="database" />
+            <div class="col-3 AdvSearch collapse">
+                <label class="form-label fw-bold">Inventory Toggle</label><br />
+                <input type="checkbox" onclick="toggleInventory(true)" class="" id="toggleInv" checked />
+                <label for="toggleInv">In Inventory</label>
+                <br />
+                <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" checked />
+                <label for=" toggleNotInv">Not In Inventory</label>
+            </div>
+
         </div>
-    </div>
-    <div class="row g-3" id="basicSearch">
-        <input class="form-control collapse" id="toggleType" value="database" />
-        <div class="col-3">
-            <label class="form-label fw-bold">Name</label>
-            <input onchange="runSearch()" class="form-control" id="searchName" />
-        </div>
-        <div class="col-3">
-            <label class="form-label fw-bold">Set</label>
-            <input onchange="runSearch()" class="form-control" id="searchSet" />
-        </div>
-        <div class="col-3">
-            <label class="form-label fw-bold">Set Number</label>
-            <input onchange="runSearch()" class="form-control" id="searchNum" />
-        </div>
-        <div class="col-3">
-            <label class="form-label fw-bold">Language</label>
-            <select onchange="runSearch()" class="form-control" id="searchLan">
-                <optgroup label="Language Select">
-                    <option value="">--- Pick a Language ---</option>
-                    <option value="ALL">Any</option>
-                </optgroup>
-                <partial name="Component/_Language" />
-            </select>
-        </div>
-        <div class="col-3 AdvSearch collapse">
-            <label class="form-label fw-bold">Tag</label>
-            <input onchange="runSearch()" class="form-control" id="searchTag" />
-        </div>
-        <div class="col-3 AdvSearch collapse">
-            <label class="form-label fw-bold">Oracle</label>
-            <input onchange="runSearch()" class="form-control" id="searchOracle" />
-        </div>
-        <div class="col-3 collapse">
-            <label class="form-label fw-bold">Location</label>
-            <input onchange="runSearch()" class="form-control" id="searchLoc" />
-        </div>
-        <div class="col-3 AdvSearch collapse">
-            <label class="form-label fw-bold">Colors</label>
-            <input onchange="runSearch()" class="form-control collapse" id="searchColors" disabled />
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-4">
-                        <input id="colorWhite" type="checkbox" value="White" onclick="toggleColor(this)" />
-                        <label for="colorWhite">White</label>
-                    </div>
-                    <div class="col-4">
-                        <input id="colorBlue" type="checkbox" value="Blue" onclick="toggleColor(this)" />
-                        <label for="colorBlue">Blue</label>
-                    </div>
-                    <div class="col-4">
-                        <input id="colorBlack" type="checkbox" value="Black" onclick="toggleColor(this)" />
-                        <label for="colorBlack">Black</label>
+        <div class="row row-cols-md-4 row-cols-sm-2">
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Name</span>
+                    <input onchange="runSearch()" class="form-control" id="searchName" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Oracle</span>
+                    <input onchange="runSearch()" class="form-control" id="searchOracle" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Type</span>
+                    <input onchange="runSearch()" class="form-control" id="searchTypeLine" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Subtype</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Rarity</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Sets</span>
+                    <input onchange="runSearch()" class="form-control" id="searchSet" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Number</span>
+                    <input onchange="runSearch()" class="form-control" id="searchNum" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Border</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Frame</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Price</span>
+                    <input class="form-control" />
+                    <span class="input-group-text input-group-text-override"> to </span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Language</span>
+                    <select onchange="runSearch()" class="form-control" id="searchLan">
+                        <optgroup label="Language Select">
+                            <option value="">--- Pick a Language ---</option>
+                            <option value="ALL">Any</option>
+                        </optgroup>
+                        <partial name="Component/_Language" />
+                    </select>
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Treatment</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">CMC</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">CMC Range</span>
+                    <input class="form-control" />
+                    <span class="input-group-text input-group-text-override"> to </span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col collapse">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Proxy</span>
+                    <input class="form-control" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Colors</span>
+                    <input onchange="runSearch()" class="form-control no-click" id="searchColors" disabled />
+                    <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <form>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'White')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorWhite" type="checkbox" value="White" />
+                                <span class="">White</span>
+                            </div>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'Blue')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorBlue" type="checkbox" value="Blue"/>
+                                <span class="">Blue</span>
+                            </div>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'Black')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorBlack" type="checkbox" value="Black" />
+                                <span class="">Black</span>
+                            </div>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'Red')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorRed" type="checkbox" value="Red" />
+                                <span class="">Red</span>
+                            </div>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'Green')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorGreen" type="checkbox" value="Green" />
+                                <span class="">Green</span>
+                            </div>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'None')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorNone" type="checkbox" value="Colorless" />
+                                <span class="">Colorless</span>
+                            </div>
+                            <div class="dropdown-item input-group cSelect" onclick="toggleColor(this,'Strict')">
+                                <span><i class="bi bi-dash text-secondary"></i></span>
+                                <input class="form-check-inline collapse" id="colorStrict" type="checkbox" value="Strict" />
+                                <span class="">Strict</span>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-4">
-                        <input id="colorRed" type="checkbox" value="Red" onclick="toggleColor(this)" />
-                        <label for="colorRed">Red</label>
-                    </div>
-                    <div class="col-4">
-                        <input id="colorGreen" type="checkbox" value="Green" onclick="toggleColor(this)" />
-                        <label for="colorGreen">Green</label>
-                    </div>
-                    <div class="col-4">
-                        <input id="colorNone" type="checkbox" value="Colorless" onclick="toggleColor(this)" />
-                        <label for="colorNone">None</label>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Tags</span>
+                    <input onchange="runSearch()" class="form-control" id="searchTag" />
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Location</span>
+                    <input onchange="runSearch()" class="form-control" id="searchLoc" />
+                    <div class="collapse" id="locationFilter">
+                        <partial name="Page/_Location" model="@Model" />
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-3 AdvSearch collapse">
-            <label class="form-label fw-bold">Type</label>
-            <input onchange="runSearch()" class="form-control" id="searchTypeLine" />
-        </div>
-        <div class="col-3 AdvSearch collapse">
-            <label class="form-label fw-bold">Inventory Toggle</label><br />
-            <input type="checkbox" onclick="toggleInventory(true)" class="" id="toggleInv" checked />
-            <label for="toggleInv">In Inventory</label>
-            <br />
-            <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" checked />
-            <label for=" toggleNotInv">Not In Inventory</label>
-        </div>
-        <div class="col-12 AdvSearch collapse" id="locationFilter">
-            <partial name="Page/_Location" model="@Model"/>
-        </div>
-
-        <div id="SearchResultsReport" class="col-12">
-            <input id="LoadedRows" class="collapse" value="0" />
-            <input id="currentlyProcessing" class="collapse" value="false" />
-            <p id="SearchResultsText">No Results</p>
-        </div>
-    </div>    
-    <div class="row collapse" id="MassEntry">
-        <div class="col-12">
-            <label class="form-label fw-bold">Mass Entry</label>
-            <p class="small">Use the SET:NUM format. Please separate cards with a new line.</p>
-            <textarea onchange="parseBulkSearch()" class="form-control w-100" id="bulkEntry"></textarea>
-        </div>
     </div>
-    <hr />       
+}
+@*Old*@
+else
+{
+    <div id="searchBar" class="container">
+        <div class="row">
+            <div class="col-12 pb-3 text-end">
+                <button class="btn btn-secondary" onclick="toggleAdvancedOptions(this)">Advanced</button>
+                <button class="btn btn-secondary" onclick="toggleLocations(this)">Location</button>
+                <button class="btn btn-secondary" onclick="toggleMassEntry(this)">Batch</button>
+            </div>
+        </div>
+        <div class="row g-3" id="basicSearch">
+            <input class="form-control collapse" id="toggleType" value="database" />
+            <div class="col-3">
+                <label class="form-label fw-bold">Name</label>
+                <input onchange="runSearch()" class="form-control" id="searchName" />
+            </div>
+            <div class="col-3">
+                <label class="form-label fw-bold">Set</label>
+                <input onchange="runSearch()" class="form-control" id="searchSet" />
+            </div>
+            <div class="col-3">
+                <label class="form-label fw-bold">Set Number</label>
+                <input onchange="runSearch()" class="form-control" id="searchNum" />
+            </div>
+            <div class="col-3">
+                <label class="form-label fw-bold">Language</label>
+                <select onchange="runSearch()" class="form-control" id="searchLan">
+                    <optgroup label="Language Select">
+                        <option value="">--- Pick a Language ---</option>
+                        <option value="ALL">Any</option>
+                    </optgroup>
+                    <partial name="Component/_Language" />
+                </select>
+            </div>
+            <div class="col-3 AdvSearch collapse">
+                <label class="form-label fw-bold">Tag</label>
+                <input onchange="runSearch()" class="form-control" id="searchTag" />
+            </div>
+            <div class="col-3 AdvSearch collapse">
+                <label class="form-label fw-bold">Oracle</label>
+                <input onchange="runSearch()" class="form-control" id="searchOracle" />
+            </div>
+            <div class="col-3 collapse">
+                <label class="form-label fw-bold">Location</label>
+                <input onchange="runSearch()" class="form-control" id="searchLoc" />
+            </div>
+            <div class="col-3 AdvSearch collapse">
+                <label class="form-label fw-bold">Colors</label>
+                <input onchange="runSearch()" class="form-control collapse" id="searchColors" disabled />
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-4">
+                            <input id="colorWhite" type="checkbox" value="White" onclick="toggleColor(this)" />
+                            <label for="colorWhite">White</label>
+                        </div>
+                        <div class="col-4">
+                            <input id="colorBlue" type="checkbox" value="Blue" onclick="toggleColor(this)" />
+                            <label for="colorBlue">Blue</label>
+                        </div>
+                        <div class="col-4">
+                            <input id="colorBlack" type="checkbox" value="Black" onclick="toggleColor(this)" />
+                            <label for="colorBlack">Black</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <input id="colorRed" type="checkbox" value="Red" onclick="toggleColor(this)" />
+                            <label for="colorRed">Red</label>
+                        </div>
+                        <div class="col-4">
+                            <input id="colorGreen" type="checkbox" value="Green" onclick="toggleColor(this)" />
+                            <label for="colorGreen">Green</label>
+                        </div>
+                        <div class="col-4">
+                            <input id="colorNone" type="checkbox" value="Colorless" onclick="toggleColor(this)" />
+                            <label for="colorNone">None</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 AdvSearch collapse">
+                <label class="form-label fw-bold">Type</label>
+                <input onchange="runSearch()" class="form-control" id="searchTypeLine" />
+            </div>
+            <div class="col-3 AdvSearch collapse">
+                <label class="form-label fw-bold">Inventory Toggle</label><br />
+                <input type="checkbox" onclick="toggleInventory(true)" class="" id="toggleInv" checked />
+                <label for="toggleInv">In Inventory</label>
+                <br />
+                <input type="checkbox" onclick="toggleInventory(false)" class="" id="toggleNotInv" checked />
+                <label for=" toggleNotInv">Not In Inventory</label>
+            </div>
+            <div id="SearchResultsReport" class="col-12 collapse">
+                <input id="LoadedRows" class="collapse" value="0" />
+                <input id="currentlyProcessing" class="collapse" value="false" />
+                <p id="SearchResultsText">No Results</p>
+            </div>
+        </div>
+        <div class="row collapse" id="locationFilter">
+            <partial name="Page/_Location" model="@Model" />
+        </div>
+        <div class="row collapse" id="MassEntry">
+            <div class="col-12">
+                <label class="form-label fw-bold">Mass Entry</label>
+                <p class="small">Use the SET:NUM format. Please separate cards with a new line.</p>
+                <textarea onchange="parseBulkSearch()" class="form-control w-100" id="bulkEntry"></textarea>
+            </div>
+        </div>
+        <hr />
+    </div>
+}
+<hr />
+<div id="SearchResultsReport" class="col-12 collapse">
+    <input id="LoadedRows" class="collapse" value="0" />
+    <input id="currentlyProcessing" class="collapse" value="false" />
+    <p id="SearchResultsText">No Results</p>
 </div>

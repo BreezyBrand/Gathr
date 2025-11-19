@@ -22,9 +22,9 @@ namespace CrummyApp.Controllers
 
         public IActionResult Index()
         {
-            ReturnRequest rReq = new ReturnRequest();                      
-            rReq.Initialize(new SearchOptions(),_config.GetSection("MaxSingleLoad").Get<int>());
-            rReq.GetLocations(_context);                          
+            ReturnRequest rReq = new ReturnRequest();
+            rReq.Initialize(new SearchOptions(), _config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.GetLocations(_context);
             return View(rReq);
         }
 
@@ -34,21 +34,21 @@ namespace CrummyApp.Controllers
             List<Card> cards = _context.Cards.Where(x => !x.card_faces.Equals("")).ToList();
 
             cards = cards.Where(x => !ImgIds.Contains(x.Id)).ToList();
-            
+
             List<CardView> preCard = new List<CardView>();
-            foreach(var card in cards)
+            foreach (var card in cards)
             {
                 List<object> cardFaces = JsonConvert.DeserializeObject<List<object>>(card.card_faces);
 
                 dynamic data = JArray.Parse(card.card_faces);
-                
+
                 var front = data[0];
                 var back = data[1];
 
                 var frontImages = front["image_uris"];
                 if (frontImages != null)
                 {
-                    
+
 
                     CardImages fImage = new CardImages()
                     {
@@ -63,7 +63,7 @@ namespace CrummyApp.Controllers
 
                     CardImages bImage = new CardImages()
                     {
-                        Id = card.Id+"|back",
+                        Id = card.Id + "|back",
                         small = back["image_uris"]["small"],
                         normal = back["image_uris"]["normal"],
                         large = back["image_uris"]["large"],
@@ -84,21 +84,21 @@ namespace CrummyApp.Controllers
 
                     CardView newCardb = new CardView(_context)
                     {
-                        Id = card.Id+"|back",
+                        Id = card.Id + "|back",
                         name = card.name,
                         art = bImage,
                         set = card.set,
                         collector_number = card.collector_number
                     };
                     preCard.Add(newCardb);
-                    
-                }                
+
+                }
 
 
-                
+
             }
-            
-            foreach(var c in preCard)
+
+            foreach (var c in preCard)
             {
                 if (_context.Images.Where(x => x.Id.Equals(c.Id)).Any())
                 {
@@ -114,14 +114,13 @@ namespace CrummyApp.Controllers
             return RedirectToAction("Index");
             //return View(preCard);
         }
-
         public IActionResult RecountInv()
         {
-            var locations = _context.Locations.ToList();            
-            foreach(var loc in locations)
+            var locations = _context.Locations.ToList();
+            foreach (var loc in locations)
             {
                 loc.Count = _context.Inventory.Where(x => x.Location.Contains(loc.Name)).Count();
-                _context.Locations.Update(loc); 
+                _context.Locations.Update(loc);
             }
             _context.SaveChanges();
             return RedirectToAction("Index");
@@ -129,6 +128,78 @@ namespace CrummyApp.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+        public IActionResult RunTypeSplit()
+        {
+            List<string> cardTypes = _context.Cards.Select(x => x.type_line).Distinct().ToList();
+            List<string> types = new List<string>();
+
+            List<string> expectTypes = new List<string>();
+            expectTypes.Add("Legendary");
+            expectTypes.Add("Creature");
+            expectTypes.Add("Artifact");
+            expectTypes.Add("Planeswalker");
+            expectTypes.Add("Enchantment");
+            expectTypes.Add("Instant");
+            expectTypes.Add("Sorcery");
+            expectTypes.Add("Battle");
+            expectTypes.Add("Token");
+            expectTypes.Add("Land");
+
+            List<string> subTypes = new List<string>();
+            //This nets just the types, not the types of types.
+            //Might want a model for that...?
+            foreach (var t in cardTypes)
+            {
+                if (t.Contains("//"))
+                {
+                    foreach (var t2 in t.Split("//"))
+                    {
+                        var t3 = t2.Split(" — ");
+                        var t4 = t3.First().Trim().Split(" ");
+                        var t5 = t3.Last().Trim().Split(" ");
+                        var t6 = t5.Except(t4).ToList();
+
+                        if (t4.Except(expectTypes).Any())
+                        {
+                            t4 = t4;
+                        }
+
+                        types.AddRange(t4);
+                        if (t6.Any())
+                        {
+                            subTypes.AddRange(t6);
+                        }
+                    }
+
+                }
+                else
+                {
+                    var t3 = t.Split(" — ");
+                    var t4 = t3.First().Trim().Split(" ");
+                    var t5 = t3.Last().Trim().Split(" ");
+                    var t6 = t5.Except(t4).ToList();
+
+                    if (t4.Except(expectTypes).Any())
+                    {
+                        t4 = t4;
+                    }
+
+                    types.AddRange(t4);
+                    if (t6.Any())
+                    {
+                        subTypes.AddRange(t6);
+                    }
+
+                }
+                types = types.Distinct().Order().ToList();
+                subTypes = subTypes.Distinct().Order().ToList();
+            }
+
+            types.Remove("");
+            subTypes.Remove("");
+
+            return RedirectToAction("Index");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

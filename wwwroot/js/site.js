@@ -38,22 +38,28 @@ function getSearchTerms() {
         tags: tags,
         color: colors,
         location: location,
-        types: typeLines,
+        type: typeLines,
+        subtype: typeLines,
         oracle: oracle,
         skip: 0,
         isValid: true,
         toggleType: toggleType
     }
 
-    const ck1 = (searchName != "" && set_code != "" && card_num != "" && lang_code != "" && tags != "")
+    const ck1 = (searchName != "" || set_code != "" || card_num != "" || lang_code != "" || tags != "" || typeLines != "")
     var ck2 = false;
+
     if (toggleType == "location") {
         ck2 = true
     } else {
         ck2 = (location != "Any")
     }
 
+    console.log(ck1)
+    console.log(ck2)
+
     const valid = (ck1 || ck2)
+    console.log(valid)
     searchData["isValid"] = valid;
 
     console.log(searchData)
@@ -186,7 +192,9 @@ function runMiniSearch(source) {
     }
 
     if (toggleType == "database") {
-        document.getElementById("miniSearchBlock").remove();
+        if (document.getElementById("miniSearchBlock")) {
+            document.getElementById("miniSearchBlock").remove();
+        }
         $.ajax({
             url: "Cards/CardDetails?set_code=" + set_code + "&card_num=" + card_num + "&lang_code=" + lang_code + "&tags=" + tags + "&skip=" + count,
             success: function (result) {
@@ -299,14 +307,15 @@ function ToggleLocationId(src, id, name, type) {
     if (src.classList.contains("btn-secondary")) {
         //Add cards
         dir = "add";
-        src.classList.toggle("btn-secondary")
-        src.classList.toggle("btn-primary")
     } else {
         //Remove cards
         dir = "rem";
-        src.classList.toggle("btn-secondary")
-        src.classList.toggle("btn-primary")
     }
+
+    src.classList.toggle("btn-secondary")
+    src.classList.toggle("btn-primary")
+    src.children[1].classList.toggle("bg-primary")
+    src.children[1].classList.toggle("bg-secondary")
 
     var searchData = getSearchTerms()
     searchData["LocationId"] = id;
@@ -506,29 +515,40 @@ function updateBulk(sInput, cardID, mark) {
 }
 
 function CreateNewLocType(src) {
+    src.disabled = true;
     var name = document.getElementById("NewLocTypeInput").value
 
     var SubmitData = {
         Name: name,
         Type: name,
-        tier: 1,
+        Tier: 1,
         Count: 0
     }
     document.getElementById("NewLocTypeInput").value = "";
-
-    console.log(SubmitData)
+    AddNewLocation(SubmitData)
 }
 function CreateNewLocation(src, type, inpId) {
-
+    src.disabled = true;
     var SubmitData = {
         Name: document.getElementById(inpId).value,
         Type: type,
-        tier: 2,
+        Tier: 2,
         Count: 0
     }
     document.getElementById(inpId).value = "";
+    AddNewLocation(SubmitData)
+}
 
-    console.log(SubmitData)
+function AddNewLocation(SubmitData) {
+    console.log(SubmitData);
+
+    $.ajax({
+        url: "Cards/AddNewLocation",
+        data: SubmitData,
+        success: function (result) {
+            document.getElementById("locationFilter").innerHTML = result;
+        }
+    })
 }
 //Display
 function toggleSearch(toggleType) {
@@ -544,20 +564,23 @@ function toggleSearch(toggleType) {
 
 function toggleAdvancedOptions(btn) {
     var advOpts = document.getElementsByClassName("AdvSearch")
-    if (btn.innerHTML == "Show Advanced Options") {
-        btn.innerHTML = 'Hide Advanced Options'
-        for (i = 0; i < advOpts.length; i++) {
-            advOpts[i].classList.remove("collapse")
-        }
-    } else {
-        btn.innerHTML = "Show Advanced Options"
-        for (i = 0; i < advOpts.length; i++) {
-            advOpts[i].classList.add("collapse")
-        }
+    btn.classList.toggle("btn-secondary")
+    btn.classList.toggle("btn-primary")
+
+    for (i = 0; i < advOpts.length; i++) {
+        advOpts[i].classList.toggle("collapse")
     }
 }
 
-function toggleMassEntry() {
+function toggleLocations(btn) {
+    btn.classList.toggle("btn-secondary")
+    btn.classList.toggle("btn-primary")
+    document.getElementById("locationFilter").classList.toggle("collapse");
+}
+
+function toggleMassEntry(btn) {
+    btn.classList.toggle("btn-secondary")
+    btn.classList.toggle("btn-primary")
     document.getElementById("MassEntry").classList.toggle("collapse");
     document.getElementById("basicSearch").classList.toggle("collapse")
 }
@@ -581,25 +604,36 @@ function toggleInventory() {
     }
 }
 
-function toggleColor(cb) {
+function toggleColor(e, color) {
+    event.stopPropagation()
+    src = document.getElementById("color" + color)
+    src.checked = !src.checked;
+
     var cSearch = document.getElementById("searchColors");
-    var colors = cSearch.value.split(",");
-    var index = colors.indexOf(cb.value);
+    var colors = [];
     var new_val = "";
-    console.log(index)
-    if (index >= 0) {
-        delete colors[index]
-    } else {
-        colors[colors.length] = cb.value
+    var eles = document.getElementsByClassName("cSelect");
+    var noneChecked = true;
+    for (i = 0; i < eles.length; i++) {
+        if (eles[i].children[1].checked) {
+            colors[colors.length] = eles[i].children[1].value
+            noneChecked = false;
+            eles[i].children[0].innerHTML = "<i class='bi bi-check2 text-success'></i>"
+        } else {
+            eles[i].children[0].innerHTML = '<i class="bi bi-ban text-danger"></i>'
+        }
     }
+    if (noneChecked) {
+        for (i = 0; i < eles.length; i++) {
+            eles[i].children[0].innerHTML = '<i class="bi bi-dash text-secondary"></i>'
+        }
+    }
+
+
     console.log(colors)
-
-
-    new_val = colors.filter(function (i) {
-        return i != ""
-    }).join(",");
-    console.log(new_val)
-    cSearch.value = new_val.replace(",,", ",").trim()
+    new_val = cleanJoin(colors.filter(onlyUnique));
+    cSearch.value = new_val;
+    runSearch();
 }
 
 function returnDrilDown() {
@@ -634,7 +668,7 @@ function onlyUnique(value, index, array) {
 function cleanJoin(array) {
     var val = "";
     for (i = 0; i < array.length; i++) {
-        if (array[i] != "") {
+        if (array[i] != "" && array[i].length > 0) {
             val += array[i] + ","
         }
     }
@@ -660,7 +694,14 @@ function SortTable(field) {
 
 }
 
-
+function ToggleOracleText(p) {
+    p.children[1].classList.toggle("collapse")
+    if (p.children[1].classList.contains("collapse")) {
+        p.children[2].innerHTML = "<br>(Show)"
+    } else {
+        p.children[2].innerHTML = "<br>(Hide)"
+    }
+}
 //Stupid Formatting Code
 function reformatCardHeads() {
     var headers = document.getElementsByClassName("card-header")

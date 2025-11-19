@@ -10,7 +10,7 @@ namespace CrummyApp.Models
         public string Type { get; set; }
         [Column("LastCount")]
         public int? Count { get;set; }
-        public int? tier { get;set; }
+        public int? Tier { get;set; }
         public string DisplayName()
         {
             if (Type.Equals("Other"))
