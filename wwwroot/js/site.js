@@ -240,10 +240,16 @@ function ExpandName(name) {
     lastRequestId = makeid();
     var RequestId = lastRequestId;
     const toggleType = document.getElementById("toggleType").value;
+    var searchData = getSearchTerms()
     console.log("Searching...")
 
+    searchData["name"] = name;
+    searchData["location"] = "Any";    
+    searchData["limit"] = false;    
+
     $.ajax({
-        url: "Cards/AllCardsByName/?name=" + name,
+        url: "Cards/AllCardsByName/",
+        data: searchData,
         success: function (result) {
             if (RequestId == lastRequestId) {
                 document.getElementById("drillDownBody").innerHTML = result;
@@ -605,7 +611,7 @@ function toggleInventory() {
 }
 
 function toggleColor(e, color) {
-    event.stopPropagation()
+    //event.stopPropagation()
     src = document.getElementById("color" + color)
     src.checked = !src.checked;
 
@@ -636,6 +642,56 @@ function toggleColor(e, color) {
     runSearch();
 }
 
+function ToggleDropdownLocation(src, type) {
+    var val = src.children[2].innerHTML;
+    if (val == "false") {
+        src.children[2].innerHTML = "true";
+    } else {
+        src.children[2].innerHTML = "false";
+    }
+
+    var locs = [];
+
+    var eles = document.getElementsByClassName("lSelect");
+    var noneChecked = true;
+    for (i = 0; i < eles.length; i++) {
+        if (eles[i].children[2].innerHTML == "true") {
+            noneChecked = false;
+            locs[locs.length] = type + " - " + eles[i].children[1].innerHTML
+            eles[i].children[0].innerHTML = "<i class='bi bi-check2 text-success'></i>"
+        } else {
+            eles[i].children[0].innerHTML = '<i class="bi bi-ban text-danger"></i>'
+        }
+    }
+    if (noneChecked) {
+        for (i = 0; i < eles.length; i++) {
+            eles[i].children[0].innerHTML = '<i class="bi bi-dash text-secondary"></i>'
+        }
+    }
+
+    console.log(locs)
+    var new_val = cleanJoin(locs.filter(onlyUnique));
+    document.getElementById("searchLoc").value = new_val
+    runSearch()
+}
+
+function ToggleDropdownGroupDisplay(src, name) {
+    eles = document.getElementsByClassName("lSelect")
+    var eleDir = false;
+    for (i = 0; i < eles.length; i++) {
+        if (eles[i].children[3].innerHTML == name) {
+            eles[i].classList.toggle("collapse")
+            eleDir = eles[i].classList.contains("collapse")
+        }
+    }
+
+    if (eleDir) {
+        src.children[0].children[1].innerHTML = '<i class="bi bi-chevron-down"></i>'
+    } else {
+        src.children[0].children[1].innerHTML = '<i class="bi bi-chevron-double-down"></i>'
+    }
+
+}
 function returnDrilDown() {
     document.getElementById("searchResults").classList.remove("collapse");
     document.getElementById("drillDown").classList.add("collapse");

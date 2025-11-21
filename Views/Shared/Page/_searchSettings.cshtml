@@ -136,7 +136,7 @@
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">Colors</span>
                     <input onchange="runSearch()" class="form-control no-click" id="searchColors" disabled />
-                    <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                         <i class="bi bi-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
@@ -190,6 +190,12 @@
                 <div class="input-group input-group-sm">
                     <span class="input-group-text">Location</span>
                     <input onchange="runSearch()" class="form-control" id="searchLoc" />
+                    <button class="btn" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu scrollDropdown">
+                        <partial name="Component/_SelectLocation" model="@Model"/>
+                    </div>
                     <div class="collapse" id="locationFilter">
                         <partial name="Page/_Location" model="@Model" />
                     </div>

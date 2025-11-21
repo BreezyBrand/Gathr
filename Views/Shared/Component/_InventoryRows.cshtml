@@ -26,11 +26,11 @@
                     <td class="text-center">
                         @if (card.hasArt && showArt)
                         {
-                            <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="@card.art.png" />
+                            <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="@card.art.png" class="imgClick" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
                         }
                         else
                         {
-                            <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="~/imgback.jpg" />
+                            <img title="@card.name (@card.set.ToUpper():@card.collector_number)" height="50" src="~/imgback.jpg" class="imgClick" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
                         }
                     </td>
                     <td>@Html.Raw(card.DisplayNameHTML())</td>

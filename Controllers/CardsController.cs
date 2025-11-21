@@ -171,7 +171,7 @@ namespace CrummyApp.Controllers
             //List<CardView> processedCards = processCards(cards,sOpt);
             return PartialView("_CardDetails", rReq);
         }
-        public PartialViewResult TransactionLog([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name")] SearchOptions sOpts)
+        public PartialViewResult TransactionLog([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name,toggleType")] SearchOptions sOpts)
         {
             List<Transaction> log;
             if (!sOpts.set_code.IsNullOrEmpty() || !sOpts.card_num.IsNullOrEmpty())
@@ -187,16 +187,23 @@ namespace CrummyApp.Controllers
 
             return PartialView("Page/_Transactions", log.OrderByDescending(n => n.TransactionDate).ToList());
         }
-        public PartialViewResult AllCardsByName(string name)
+        public PartialViewResult AllCardsByName([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name,toggleType")] SearchOptions sOpts)
         {
-            List<Card> cards = getCardsByName(name);
-            SearchOptions sOpt = new SearchOptions()
+            //List<Card> cards = getCardsByName(name);
+            SearchOptions nOpt = new SearchOptions()
             {
+                name = sOpts.name,
+                location = "Any",
+                lang_code = "EN",
                 limit = false,
                 skip = 0
             };
-            List<CardView> processedCards = processCards(cards, sOpt);
-            return PartialView("_Inventory", processedCards.ToList());
+            //List<CardView> processedCards = processCards(cards, sOpt);
+            ReturnRequest rReq = new ReturnRequest();            
+            rReq.Initialize(sOpts, _config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.GetCards(_context);
+
+            return PartialView("Page/_Inventory", rReq);
         }
         public PartialViewResult GetCardsByLocation([Bind("set_code,lang_code,card_num,tags,skip,oracle,type,color,location,name,toggleType")] SearchOptions sOpts, int LocationId)
         {

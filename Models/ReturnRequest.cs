@@ -30,6 +30,7 @@ namespace CrummyApp.Models
             searchCards(context);
             GetLocations(context);
             processCards(context);
+            return;
         }
 
         public void SetCards(ApplicationContext context, List<Card> cards)
@@ -37,11 +38,13 @@ namespace CrummyApp.Models
             rawCards = cards;
             max_matches = cards.Count();
             processCards(context);
+            return;
         }
 
         private void searchCards(ApplicationContext context)
         {
             rawCards = sOpt.MatchedCards(context.Cards.ToList(), context);
+            return;
         }
 
         private void processCards(ApplicationContext context)

@@ -1,25 +1,25 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
-  background-color: #F2F2F2;
+    margin-bottom: 60px;
+    background-color: #F2F2F2;
 }
 
 
@@ -27,7 +27,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: -70px;    
+    margin-left: -70px;
 }
 
 .hand {
@@ -35,12 +35,18 @@ body {
     height: 100px;
 }
 
-.imgClick, .fauxPointer, .cSelect{
+.imgClick, .fauxPointer, .cSelect {
     cursor: pointer;
 }
 
-.no-click{
-    cursor:not-allowed;
+.no-click {
+    cursor: not-allowed;
+}
+
+.scrollDropdown {
+    max-height: 350px;
+    min-width: 200px;
+    overflow-y: scroll;
 }
 
 .ani-card {
@@ -62,14 +68,16 @@ body {
     justify-content: center;
     align-items: center;
     transition-timing-function: cubic-bezier(0.18, 0.89, 0.32, 1.28);
-    span {
-            background-color: #8badc8;
-            display: none;
-            margin: 0 auto;
-            width: 50px;
-            height: 50px;
-            border-radius: 25px;
-        }
+    span
+
+{
+    background-color: #8badc8;
+    display: none;
+    margin: 0 auto;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+}
 
 &.card-1 {
     z-index: 3;

@@ -2,10 +2,31 @@
 
 @foreach (var OptG in Model.Locations.Where(x => x.Tier.Equals(1)).OrderBy(x => x.Name))
 {
-    <ul>
-        @foreach (var Opt in Model.Locations.Where(x => x.Type.Equals(OptG.Name)))
-        {
-            <li>@Opt.Name</li>
-        }
-    </ul>
+    <div onclick="ToggleDropdownGroupDisplay(this,'@OptG.Name')">
+        <span class="dropdown-header">
+            <span class="fw-bold">@OptG.Name</span>
+            <span><i class="bi bi-arrow-down"></i></span>
+        </span>
+    </div>
+    <div class="dropdown-item input-group small lSelect" onclick="ToggleDropdownGroup(this,'@OptG.Name')">
+        <span>
+            <i class="bi bi-dash text-secondary"></i>
+        </span>
+        <span>All @String.Concat(OptG.Name, "s")</span>
+        <span class="collapse">false</span>
+        <span class="collapse">@OptG.Type</span>
+        <span class="badge bg-primary rounded-pill">@Model.Locations.Where(x => x.Type.Equals(OptG.Name) && x.Tier > 1).Sum(x => x.Count)</span>
+    </div>
+    @foreach (var Opt in Model.Locations.Where(x => x.Type.Equals(OptG.Name) && x.Tier > 1))
+    {
+        <div class="dropdown-item input-group small w-100 lSelect container-fluid" onclick="ToggleDropdownLocation(this,'@OptG.Name')">
+            <span>
+                <i class="bi bi-dash text-secondary"></i>
+            </span>
+            <span class="">@Opt.Name</span>
+            <span class="collapse">false</span>
+            <span class="collapse">@Opt.Type</span>
+            <span class="badge bg-primary rounded-pill">@Opt.Count</span>
+        </div>
+    }
 }
