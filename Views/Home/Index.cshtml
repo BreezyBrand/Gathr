@@ -18,7 +18,10 @@
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulkSet" type="button" role="tab" aria-controls="bulkSet" aria-selected="false" onclick="toggleSearch('bulk')">Bulk Entry</button>
-    </li>    
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="mass-tab" data-bs-toggle="tab" data-bs-target="#massEntry" type="button" role="tab" aria-controls="massEntry" aria-selected="false" onclick="toggleSearch('mass')">Mass Entry</button>
+    </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="transactionLog" data-bs-toggle="tab" data-bs-target="#transactionLog" type="button" role="tab" aria-controls="transactionLog" aria-selected="false" onclick="getTransactions()">Transactions</button>
     </li>
@@ -36,6 +39,10 @@
     </div>
     <div id="bulkSet" class="container tab-pane fade" role="tabpanel" aria-labelledby="bulk-tab" tabindex="2">
         <h4>Bulk Entry</h4>
+    </div>
+    <div id="massEntry" class="container tab-pane fade" role="tabpanel" aria-labelledby="massEntry" tabindex="3">
+        <h4>Mass Entry</h4>
+        <partial name="Page/_MassEntry" model="@Model" />
     </div>
     <div id="transactionLog" class="container tab-pane fade" role="tabpanel" aria-labelledby="transactionLog" tabindex="3">
         <h4>Recent Transactions</h4>

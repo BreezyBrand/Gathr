@@ -19,9 +19,22 @@ html {
 
 body {
     margin-bottom: 60px;
-    background-color: #F2F2F2;
+    background-color: #3f4658;
+    color:white;
 }
 
+.nav-link{
+    color:white
+}
+
+.nav-link:hover {
+    color: #e0e0e0
+}
+
+#searchResults div, #searchResults table {
+    background-color: #3f4658;
+    color: white;
+}
 
 .flickity-container {
     display: flex;

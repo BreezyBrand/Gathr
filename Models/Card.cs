@@ -1,6 +1,7 @@
 ﻿using CrummyApp.Data;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
@@ -262,8 +263,12 @@ namespace CrummyApp.Models
     }
     public class EzCard
     {
+        [DefaultValue("")]
+        public string Qty { get; set; }
+        public string CardName { get; set; }
         public string SetCode { get; set; }
-        public string CardNum { get; set; }
+        public string CardNum { get; set; }        
+        public string mark { get; set; }
     }
     [Table("Images")]
     public class CardImages
@@ -278,4 +283,8 @@ namespace CrummyApp.Models
         public string border_crop { get; set; }
     }
 
+    public class CardInv
+    {
+        public string cardInvString { get; set; }
+    }
 }

@@ -122,3 +122,30 @@ CREATE VIEW [dbo].[SpreadsheetView]
 		LEFT JOIN Cards c ON c.id=i.Card_Id
 		LEFT JOIN PriceHistory p ON i.Card_Id = p.CardId
 	GROUP BY c.id, c.[name], c.[set], c.collector_number, i.Mark, i.[Location],i.[Language], c.rarity, c.type_line, usd, usd_etched, usd_foil
+
+GO;
+
+CREATE   VIEW [InventoryString]
+AS
+	SELECT DISTINCT
+		Concat(
+		(
+			SELECT 
+				COUNT(Id) 
+			FROM 
+				InventoryV2 ic
+			WHERE
+				ic.Card_Id = c.id
+				AND ic.Mark = i.Mark
+			GROUP BY 
+				Card_Id
+		),
+		' ',
+		c.name + ' (' + UPPER(c.[set]) + ':' + c.collector_number + ') ' + '*' + i.mark + '*',
+		' #'+i.Location
+		) as 'CardString'
+	FROM
+		InventoryV2 i
+	JOIN Cards c ON c.id = i.Card_Id
+
+GO;

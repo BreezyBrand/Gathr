@@ -1,11 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using System.Text.Json.Nodes;
 using CrummyApp.Data;
 using CrummyApp.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -117,6 +123,57 @@ namespace CrummyApp.Controllers
             {
                 return PartialView("Page/_Inventory", rReq);
             }
+        }
+        //FIX
+        public string GetMassInventory()
+        {
+            string invString = "";
+            List<string> invStringList = new List<string>();
+            var inventory = _context.Inventory.ToList();            
+            List<object> Counts = new List<object>();
+            var ids = inventory.Select(x => x.Card_Id).Distinct();
+            foreach(var inv in ids)
+            {
+                var cnt = new {
+                    id = inv,
+                    count = inventory.Where(x => x.Card_Id.Equals(inv)).Count()
+                };
+                Counts.Add(cnt);
+            }
+
+            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=CardCatalog;Trusted_Connection=True;MultipleActiveResultSets=true";
+            string queryString = "SELECT * FROM InventoryString ORDER BY SUBSTRING(CardString,CHARINDEX(' ',CardString),1000)";            
+            using(SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);                
+
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    invString += reader.GetString(0)+"\n";
+                }
+                reader.Close();
+                
+            }
+            
+            return invString.Replace("*-*","");
+        }
+
+        public PartialViewResult QueryCard(int Count,string CardName,string Set,string CN,string Mark,string Tags)        
+        {
+            ReturnRequest rReq = new ReturnRequest();
+            SearchOptions sOpts = new SearchOptions()
+            {
+                card_num = CN,
+                set_code = Set                
+            };
+            rReq.Initialize(sOpts, _config.GetSection("MaxSingleLoad").Get<int>());
+            rReq.sOpt.limit = false;
+            rReq.returnLimit = 2000;
+            rReq.GetCards(_context);
+            return PartialView("Component/_CardImg", rReq);
         }
         public PartialViewResult EZSearch(string raw_cards)
         {

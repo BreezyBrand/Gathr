@@ -1,0 +1,45 @@
+﻿@model ReturnRequest
+@inject IConfiguration config;
+
+@{    
+    string thisID;
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
+    bool inInv;
+    string invClass;        
+}
+
+@foreach (var card in Model.Cards.OrderBy(n => n.set).ThenBy(n => n.SortOrder))
+{
+    thisID = card.Id;
+    inInv = card.inventory.Any();
+    invClass = inInv ? "InInventory" : "";
+
+    var nCount = card.inventory.Where(n => n.Mark.Equals("-")).Count();
+    var fCount = card.inventory.Where(n => n.Mark.Equals("f")).Count();
+    var eCount = card.inventory.Where(n => n.Mark.Equals("etched")).Count();
+
+
+    <div class="col-2 card @invClass mt-2 invCard">
+        <div class="card-header d-flex justify-content-center align-items-center">
+            <p class="small text-center align-middle flex-fill m-0 p-0">
+                <strong>@Html.Raw(card.DisplayNameHTML())</strong>
+                <br />
+                <span>(@card.set.ToUpper():@card.collector_number)</span>
+            </p>
+        </div>
+        <div class="card-body">
+            @if (card.hasArt && showArt)
+            {
+                <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100 imgClick" src="@card.art.png" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
+            }
+            else
+            {
+                <img title="@card.name (@card.set.ToUpper():@card.collector_number)" class="w-100 imgClick" src="~/imgback.jpg" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="imgUpdate(this)" />
+            }
+        </div>
+        <div class="card-footer container-fluid">
+            <div class="row">               
+            </div>
+        </div>
+    </div>
+}

@@ -244,8 +244,8 @@ function ExpandName(name) {
     console.log("Searching...")
 
     searchData["name"] = name;
-    searchData["location"] = "Any";    
-    searchData["limit"] = false;    
+    searchData["location"] = "Any";
+    searchData["limit"] = false;
 
     $.ajax({
         url: "Cards/AllCardsByName/",
@@ -364,6 +364,76 @@ function ToggleLocationId(src, id, name, type) {
         document.getElementById("searchLoc").value = cleanJoin(locationNames.filter(onlyUnique))
         runSearch()
     }
+}
+function GetMassInventory() {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+
+    document.getElementById("inventoryRawFormat").classList.add("placeholder")
+
+    $.ajax({
+        url: "Cards/GetMassInventory",
+        success: function (result) {
+            if (RequestId == lastRequestId) {
+
+                //var jObj = JSON.parse(result);
+                //console.log(jObj);
+                document.getElementById("inventoryRawFormat").value = result
+                document.getElementById("inventoryRawFormat").classList.remove("placeholder")
+                document.getElementById("LoadingShuffle").classList.add("collapse")
+                EndRequest()
+            }
+        },
+        error: function (result) {
+            console.log(result)
+        }
+    })
+}
+
+function ValidateMassInventory() {
+    lastRequestId = makeid();
+    var RequestId = lastRequestId;
+    var oldVal = document.getElementById("inventoryRawFormat").value
+    var arr = oldVal.split("\n");
+    //console.log(arr)
+
+    for (i = 0; i < arr.length; i++) {
+        var marked = arr[i].indexOf(String.fromCharCode(42)) > 0;
+        var thisMark = "";
+        if (marked) {
+            //console.log(arr[i] + " Contains Mark")
+            //console.log(arr[i].indexOf(String.fromCharCode(42)))
+            thisMark = arr[i].substring(arr[i].indexOf(String.fromCharCode(42)), 100);
+            //console.log(thisMark)
+            thisMark = thisMark.substring(0, thisMark.indexOf(" "))
+            //console.log(thisMark)
+        }
+
+        var valObj = {
+            "Count": arr[i].substring(0, arr[i].indexOf(" ")).trim(),
+            "CardName": arr[i].substring(arr[i].indexOf(" ") + 1, arr[i].indexOf("(")).trim(),
+            "Set": arr[i].substring(arr[i].indexOf("(") + 1, arr[i].indexOf(":")).trim(),
+            "CN": arr[i].substring(arr[i].indexOf(":") + 1, arr[i].indexOf(")")).trim(),
+            "Mark": marked ? thisMark : "",
+            "Tags": arr[i].indexOf("#") > 0 ? arr[i].substring(arr[i].indexOf("#"), 10000).trim() : ""
+        }
+        //console.log(valObj)
+
+        $.ajax({
+            url: "Cards/QueryCard",
+            data: valObj,
+            success: function (result) {
+                if (RequestId == lastRequestId) {
+                    document.getElementById("searchResults").innerHTML = result
+                }
+            }
+        })
+    }
+    //document.getElementById("inventoryRawFormat").value = arr.join("\n")
+
+
+
+    return;
 }
 //POST
 function AddCard(id) {
@@ -559,8 +629,17 @@ function AddNewLocation(SubmitData) {
 //Display
 function toggleSearch(toggleType) {
     document.getElementById("toggleType").value = toggleType;
+    document.getElementById("searchBar").classList.remove("collapse");
     if (toggleType == "inventory") {
         document.getElementById("toggleInv").checked = true;
+    }
+    else if (toggleType == "mass") {
+        document.getElementById("searchResults").innerHTML = "";
+        document.getElementById("searchBar").classList.add("collapse");
+        document.getElementById("searchResults").classList.add("collapse")
+        document.getElementById("LoadingShuffle").classList.add("collapse")
+        GetMassInventory()
+        return;
     }
     document.getElementById("searchResults").innerHTML = "";
     document.getElementById("searchResults").classList.add("collapse")
@@ -878,6 +957,27 @@ function imgUpdate(e) {
     document.getElementById("HighlightImage").src = e.src;
     document.getElementById("imageModalLabel").innerHTML = e.title
 }
+
+function RemoveTags(btn) {
+    var oldVal = document.getElementById("inventoryRawFormat").value
+    var arr = oldVal.split("\n");
+    document.Element
+    var btnText = btn.innerHTML
+    if (btnText.indexOf("Remove") >= 0) {
+        btn.innerHTML = "Restore Tags/Location"
+        console.log(arr)
+        for (i = 0; i < arr.length; i++) {
+            arr[i] = arr[i].substring(0, arr[i].indexOf("#") - 1)
+        }
+        document.getElementById("inventoryRawFormat").value = arr.join("\n")
+        return;
+    } else {
+        btn.innerHTML = "Remove Location/Tags"
+        GetMassInventory()
+        return;
+    }
+}
+
 
 window.addEventListener('scroll', () => {
     const scrollPosition = window.scrollY;

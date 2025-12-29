@@ -1,0 +1,31 @@
+﻿@inject IConfiguration config;
+
+@{
+    string thisID;
+    bool showArt = config.GetSection("ShowArt").Get<bool>();
+    bool inInv;
+    string invClass;
+}
+
+<div class="container-fluid">
+    <div class="row g-2">
+        <div class="col-12">
+            <p>Load, update and validate our whole inventory in one quick place!</p>        
+            <textarea id="inventoryRawFormat" class="w-100" style="min-height:400px">
+
+            </textarea>
+        </div>
+        <div class="col text-center">
+            <button onclick="RemoveTags(this)">Remove Tags/Location</button>
+        </div>
+        <div class="col text-center">
+            <button onclick="ValidateMassInventory()">Validate List</button>
+        </div>
+        <div class="col text-center">
+            <button onclick="GetMassInventory()">Load Inventory</button>
+        </div>
+        <div class="col text-center">
+            <button disabled>Save Inventory</button>
+        </div>        
+    </div>
+</div>
