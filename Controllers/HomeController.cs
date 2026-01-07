@@ -1,11 +1,11 @@
 using System.Diagnostics;
-using CrummyApp.Data;
-using CrummyApp.Models;
+using Gathr.Data;
+using Gathr.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CrummyApp.Controllers
+namespace Gathr.Controllers
 {
     public class HomeController : Controller
     {
@@ -26,6 +26,12 @@ namespace CrummyApp.Controllers
             rReq.Initialize(new SearchOptions(), _config.GetSection("MaxSingleLoad").Get<int>());
             rReq.GetLocations(_context);
             return View(rReq);
+        }
+
+        public IActionResult Goog()
+        {
+            
+            return View();
         }
 
         public IActionResult RestoreImages()

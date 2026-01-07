@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Google Sheets Extract";
+}
+
+<h3>Google Sheets Extract</h3>
+<!--Add buttons to initiate auth sequence and sign out-->
+<div id="btnBlock" class="w-100 container">
+    <div class="row">
+        <div class="col-12">
+            <h4>Google Connection</h4>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-success" id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+            <button class="btn btn-warning" id="import_button" onclick="PostCardsImport()">Clear and Override Inventory</button>
+            <button class="btn btn-danger" id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+        </div>
+        <div id="SheetsForm" class="col-12 container-fluid">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Spreadsheet Id</span>
+                        <input class="form-control" id="SpreadsheetId" />
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Oracle</span>
+                        <input class="form-control" id="SpreadsheetRange" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="LoadingBar" class="w-100 collapse pt-4 pb-2">
+    <div class="w3-border">
+        <div id="myBar" class="rounded movingLoadingBar" style="width: 100%;">
+            <p class="text-center fw-bold" style="text-shadow:1px 1px 0 #444" id="myBarProgress">100%</p>
+        </div>
+    </div>
+</div>
+
+<div id="SampleExtract" class="collapse container">
+    <div class="row">
+        <h4 class="col-12">Sample Data Pull</h4>
+        <div class="col-6">
+            <p class="small">
+                Please ensure that the columns of the imported sheet are in the following order:
+            </p>
+        </div>
+        <div class="col-6">
+            <ol>
+                <li>Qty</li>
+                <li>Set</li>
+                <li>Number</li>
+                <li>Mark</li>
+                <li>Language</li>
+                <li>Name</li>
+                <li>Type</li>
+                <li>Rarity</li>
+                <li>Confirmed</li>
+                <li>Location</li>
+                <li>Type 1</li>
+                <li>Type 2</li>
+                <li>Type 3</li>
+                <li>Note</li>
+            </ol>
+        </div>
+        <pre id="content" style="white-space: pre-wrap;"></pre>
+    </div>
+</div>
+
+<script src="~/js/GoogleSheets.js" asp-append-version="true"></script>
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>

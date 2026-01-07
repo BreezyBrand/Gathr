@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CrummyApp.Models
+namespace Gathr.Models
 {
     [Table("InventoryV2")]
     public class InvOptions

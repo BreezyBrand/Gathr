@@ -1,9 +1,9 @@
-﻿using CrummyApp.Data;
+﻿using Gathr.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 
-namespace CrummyApp.Models
+namespace Gathr.Models
 {
     public class ReturnRequest
     {
@@ -43,7 +43,15 @@ namespace CrummyApp.Models
 
         private void searchCards(ApplicationContext context)
         {
-            rawCards = sOpt.MatchedCards(context.Cards.ToList(), context);
+            if (sOpt.toggleType.Equals("inventory"))
+            {
+                List<string> cardsInInv = context.Inventory.Select(x => x.Card_Id).Distinct().ToList();
+                List<Card> cards = context.Cards.Where(x => cardsInInv.Contains(x.Id)).ToList();
+                rawCards = sOpt.MatchedCards(cards, context);
+            } else
+            {
+                rawCards = sOpt.MatchedCards(context.Cards.ToList(), context);
+            }
             return;
         }
 

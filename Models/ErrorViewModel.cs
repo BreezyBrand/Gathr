@@ -1,4 +1,4 @@
-namespace CrummyApp.Models
+namespace Gathr.Models
 {
     public class ErrorViewModel
     {

@@ -1,4 +1,4 @@
-﻿using CrummyApp.Data;
+﻿using Gathr.Data;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace CrummyApp.Models
+namespace Gathr.Models
 {
     public class Card
     {

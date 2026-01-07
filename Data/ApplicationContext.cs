@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using CrummyApp.Models;
+using Gathr.Models;
 
-namespace CrummyApp.Data
+namespace Gathr.Data
 {
     public class ApplicationContext : DbContext
     {

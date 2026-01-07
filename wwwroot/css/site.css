@@ -20,16 +20,16 @@ html {
 body {
     margin-bottom: 60px;
     background-color: #3f4658;
-    color:white;
+    color: white;
 }
 
-.nav-link{
-    color:white
+.nav-link {
+    color: white
 }
 
-.nav-link:hover {
-    color: #e0e0e0
-}
+    .nav-link:hover {
+        color: #e0e0e0
+    }
 
 #searchResults div, #searchResults table {
     background-color: #3f4658;
@@ -205,4 +205,24 @@ body {
     }
 
     //slide out
+}
+
+.movingLoadingBar {
+    background: linear-gradient(-45deg,rgb(0,115,62),rgb(211,32,42),rgb(21,11,0),rgb(14,104,171),rgb(248,231,185));
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }

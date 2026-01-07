@@ -4,9 +4,10 @@ using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.Json.Nodes;
-using CrummyApp.Data;
-using CrummyApp.Models;
+using Gathr.Data;
+using Gathr.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -16,7 +17,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace CrummyApp.Controllers
+namespace Gathr.Controllers
 {
     public class CardsController : Controller
     {
@@ -178,7 +179,7 @@ namespace CrummyApp.Controllers
         public PartialViewResult EZSearch(string raw_cards)
         {
             dynamic raw_cards_list = JsonConvert.DeserializeObject(raw_cards);
-            List<EzCard> ezCards = new List<EzCard>();
+            List <EzCard> ezCards = new List<EzCard>();
             foreach (var raw_card_obj in raw_cards_list)
             {
                 EzCard ez = new EzCard()
@@ -469,6 +470,84 @@ namespace CrummyApp.Controllers
             _context.SaveChanges();
             return 0;
         }
+
+        //Refresh with Spreadsheet
+        public string ResetMyInventory()
+        {
+            //Delete current inventory
+            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=CardCatalog;Trusted_Connection=True;MultipleActiveResultSets=true";
+            string queryString = "DELETE FROM InventoryV2; DBCC CHECKIDENT ('InventoryV2', RESEED, 0);";            
+            using(SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);                
+
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();                
+                reader.Close();
+                
+            }
+            //
+            return "Inventory Cleared";
+        }
+
+        public string UpdateCardsFromSheet(string rows)
+        {
+            dynamic raw_cards_list = JsonConvert.DeserializeObject(rows);
+            List <SpreadsheetRow> sRows = new List<SpreadsheetRow>();
+            foreach (var raw_card_obj in raw_cards_list)
+            {
+                SpreadsheetRow sRow = new SpreadsheetRow()
+                {
+                    Qty = raw_card_obj.Qty,
+                    _Set = raw_card_obj._Set,
+                    _SetNumber = raw_card_obj._SetNumber,
+                    Confirmed = raw_card_obj.Confirmed,
+                    Language = raw_card_obj.Language,
+                    Location = raw_card_obj.Location,
+                    Mark = raw_card_obj.Mark,
+                    Name = raw_card_obj.Name,
+                    Note = raw_card_obj.Note
+                };
+                sRows.Add(sRow);
+            }            
+
+            foreach(var row in sRows)
+            {                
+                if (!row.Qty.Equals("") && !row._Set.Equals("") && !row._SetNumber.Equals("")) {                    
+                    var matchedCards = _context.Cards.Where(x => 
+                        x.set.Equals(row._Set.ToLower()) 
+                        && x.collector_number.Equals(row._SetNumber)
+                        && x.lang.Equals(row.Language.ToLower())
+                        ).ToList();
+
+                    if (matchedCards.Count() > 0) {
+                        Card thisCard = matchedCards.First();
+
+                        //_context.Inventory.Where(x => x.Card_Id.Equals(thisCard.Id)).ToList();
+                        for (int c = 0; c < Int32.Parse(row.Qty); c++)
+                        {
+                            InvOptions inv = new InvOptions()
+                            {
+                                Card_Id = thisCard.Id,
+                                confirmed_date = DateTime.UtcNow,
+                                Mark = row.Mark,
+                                Language = row.Language,
+                                Location = row.Location,
+                                UpdateUser = "Google",
+                                _confirmed = true,                                
+                            };
+
+                            _context.Inventory.Add(inv);
+                        }
+                    }
+                }
+                
+            }
+            _context.SaveChanges();
+
+            return "Complete";
+        }
+
         //Tracking Details
         private string CompareInventory(InvOptions old, tempInv inv)
         {

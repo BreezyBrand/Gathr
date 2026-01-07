@@ -1,10 +1,10 @@
-﻿using CrummyApp.Data;
+﻿using Gathr.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace CrummyApp.Models
+namespace Gathr.Models
 {
     public class SearchOptions()
     {

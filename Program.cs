@@ -1,6 +1,9 @@
-using CrummyApp.Data;
-using CrummyApp.Models;
+using Gathr.Data;
+using Gathr.Models;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +15,9 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'localDB' not found.")));
 
-var app = builder.Build();
 
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
