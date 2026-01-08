@@ -3,7 +3,11 @@
 /* exported handleAuthClick */
 /* exported handleSignoutClick */
 
-// TODO(developer): Set to client ID and API key from the Developer Console
+//default SS
+//
+//Range
+//Class Data!A2:E26
+
 const CLIENT_ID = '472241564480-hitnimac1ouv1kane9qb52otue9jd3ht.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyBeOc7v2MkLFxUKIgHV4IpwT3dwffaEhAQ';
 
@@ -21,6 +25,7 @@ let gisInited = false;
 document.getElementById('authorize_button').style.visibility = 'hidden';
 document.getElementById('import_button').style.visibility = 'hidden';
 document.getElementById('signout_button').style.visibility = 'hidden';
+document.getElementById('SheetsForm').classList.add("collapse")
 
 /**
  * Callback after api.js is loaded.
@@ -75,6 +80,7 @@ function handleAuthClick() {
         document.getElementById('signout_button').style.visibility = 'visible';
         document.getElementById('import_button').style.visibility = 'visible';
         document.getElementById('authorize_button').innerText = 'Refresh';
+        document.getElementById('SheetsForm').classList.remove("collapse")
         //await GetCards();
         //await listMajors();
     };
@@ -104,46 +110,45 @@ function handleSignoutClick() {
     }
 }
 
-/**
- * Print the names and majors of students in a sample spreadsheet:
- * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
- */
-async function listMajors() {
-    let response;
-    try {
-        // Fetch first 10 files
-        response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-            range: 'Class Data!A2:E',
-        });
-    } catch (err) {
-        document.getElementById('content').innerText = err.message;
-        return;
+/*Allow user to Validate Spreadsheet*/
+function CheckSpreadsheet() {
+    document.getElementById('SheetsForm').classList.add("collapse")    
+
+    var userSettings = {
+        DefaultGoogleSpreadsheet: document.getElementById("SpreadsheetId").value,
+        DefaultGoogleRange: document.getElementById("SpreadsheetRange").value
     }
-    const range = response.result;
-    if (!range || !range.values || range.values.length == 0) {
-        document.getElementById('content').innerText = 'No values found.';
-        return;
-    }
-    // Flatten to string to display
-    const output = range.values.reduce(
-        (str, row) => `${str}${row[0]}, ${row[4]}\n`,
-        'Name, Major:\n');
-    document.getElementById('content').innerText = output;
+    $.ajax({
+        url: "../Home/UpdateUserSettings",
+        data: userSettings,
+        success: function (result) {
+            //console.log(result)
+        },
+        error: function (result) {
+            processingState = "Good"            
+        }
+    })
+    GetCards(userSettings.DefaultGoogleSpreadsheet, userSettings.DefaultGoogleRange)
+
 }
 
-/*Allow user to Validate Spreadsheet*/
-async function GetCards() {
+async function GetCards(DefaultGoogleSpreadsheet, DefaultGoogleRange) {
     document.getElementById('SampleExtract').classList.remove("collapse");
     document.getElementById('LoadingBar').classList.remove("collapse")
+    document.getElementById('SheetsForm').classList.remove("collapse")
+    document.getElementById("SpreadsheetId").disabled = true;
+    document.getElementById("SpreadsheetRange").disabled = true;
+
     UpdateProgressBarGoog("0%")
+
+    console.log({ DefaultGoogleSpreadsheet, DefaultGoogleRange })
 
     let response;
     try {
         // Fetch first 10 files
         response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: '1JzLf5LCDhzBetx_8T26RrKUDAGJDa4-zPzf8YqPmEaA',
-            range: 'Inventory (New)!A1:N26',
+            spreadsheetId: DefaultGoogleSpreadsheet,
+            range: DefaultGoogleRange,
         });
     } catch (err) {
         document.getElementById('content').innerText = err.message;
@@ -214,21 +219,33 @@ async function GetCards() {
     //    (str, row) => `${str}${row[0]}, ${row[4]}\n`,
     //    ':\n');
     document.getElementById('content').innerHTML = htmlString;
-    UpdateProgressBarGoog("100%")    
+    //document.getElementById('btnBlock').classList.add("collapse")
+    document.getElementById('LoadingBar').classList.add("collapse")
+    document.getElementById("SpreadsheetId").disabled = false;
+    document.getElementById("SpreadsheetRange").disabled = false;
+    UpdateProgressBarGoog("100%")
 }
 
 /*Import Cards*/
 async function PostCardsImport() {
     document.getElementById('btnBlock').classList.add("collapse")
     document.getElementById('LoadingBar').classList.remove("collapse")
-    UpdateProgressBarGoog("0%")
+    UpdateProgressBarGoog("0%")    
+
+    var userSettings = {
+        DefaultGoogleSpreadsheet: document.getElementById("SpreadsheetId").value,
+        DefaultGoogleRange: document.getElementById("SpreadsheetRange").value
+    }
+
+    document.getElementById("SpreadsheetId").disabled = true;
+    document.getElementById("SpreadsheetRange").disabled = true;
 
     let response;
     try {
         // Fetch first 10 files
         response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: '1JzLf5LCDhzBetx_8T26RrKUDAGJDa4-zPzf8YqPmEaA',
-            range: 'Inventory (New)!A:N',
+            spreadsheetId: userSettings.DefaultGoogleSpreadsheet,
+            range: userSettings.DefaultGoogleRange,
         });
     } catch (err) {
         document.getElementById('content').innerText = err.message;
@@ -258,34 +275,42 @@ async function PostCardsImport() {
         }
     }
 
+    //Cards = Cards.sort((a, b) => a._Set.localeCompare(b._Set) || parseInt(a._SetNumber) - parseInt(b._SetNumber))
+
     UpdateProgressBarGoog("75%")
-    var dbClear = true        
-    await $.ajax({
-        url: "../Cards/ResetMyInventory",
-        success: function (result) {
-            console.log(result)
-        },
-        error: function (result) {
-            console.log(result)
-            var dbClear = false;
+    if (false) {
+        var dbClear = true
+        await $.ajax({
+            url: "../Cards/ResetMyInventory",
+            success: function (result) {
+                console.log(result)
+            },
+            error: function (result) {
+                console.log(result)
+                var dbClear = false;
+            }
+        })
+        if (!dbClear) {
+            document.getElementById('processing').innerText = "Could not clear the database. Please try again later.";
+            document.getElementById('LoadingBar').classList.add("collapse")
+            document.getElementById('btnBlock').classList.remove("collapse")
+            document.getElementById("SpreadsheetId").disabled = false;
+            document.getElementById("SpreadsheetRange").disabled = false;
+            return;
         }
-    })
-    if (!dbClear) {
-        document.getElementById('processing').innerText = "Could not clear the database. Please try again later.";
-        document.getElementById('LoadingBar').classList.add("collapse")
-        document.getElementById('btnBlock').classList.remove("collapse")
-        return;
     }
-    UpdateProgressBarGoog("100%")
-    UpdateCards(Cards, 10)
+    UpdateProgressBarGoog("100%", "Preparation Complete. Beginning upload...")
+    UpdateCards(Cards, 20)
     document.getElementById('btnBlock').classList.remove("collapse")
+    document.getElementById("SpreadsheetId").disabled = false;
+    document.getElementById("SpreadsheetRange").disabled = false;
 }
 
-async function UpdateCards(Cards,chunk) {
+async function UpdateCards(Cards, chunk) {
     //const chunk = 10;
-    for (i = 0; i < Cards.length; i+= chunk) {
+    for (i = 0; i < Cards.length; i += chunk) {
         var processingState = "Good"
-        cardChunk = Cards.slice(i, i + chunk)        
+        cardChunk = Cards.slice(i, i + chunk)
         await $.ajax({
             url: "../Cards/UpdateCardsFromSheet",
             data: {
@@ -295,21 +320,35 @@ async function UpdateCards(Cards,chunk) {
                 //console.log(result)
             },
             error: function (result) {
-                console.log("Failed processing chunk "+i+" to "+(i+chunk)+".")
-                processingState = "Good"
+                console.log("Failed processing chunk " + i + " to " + (i + chunk) + ".")
+                processingState = "Bad"
+                document.getElementById('LoadingBar').classList.add("collapse")
             }
         })
 
         if (processingState == "Good") {
             var pct = parseInt((i + chunk) / Cards.length * 10000) / 100
             //document.getElementById('processing').innerText = pct + "%";
-            UpdateProgressBarGoog(pct+"%")
+            pct = Math.min(pct, 100)
+            if (pct >= 100) {
+                UpdateProgressBarGoog(pct + "%", "Complete!")
+            }
+            else if (pct > 25) {
+                var lastSet = Cards.slice(i + chunk, i + chunk + 1)[0];
+                var lastSetVal = "";
+                if (lastSet != undefined) {
+                    lastSetVal = lastSet._Set
+                }
+                UpdateProgressBarGoog(pct + "%", "Working on cards from " + lastSetVal)
+            } else {
+                UpdateProgressBarGoog(pct + "%", "")
+            }
         } else {
             break;
         }
     }
 }
-function UpdateProgressBarGoog(pct,preface = "") {
+function UpdateProgressBarGoog(pct, preface = "") {
     document.getElementById("myBar").style.width = pct
     if (preface != "") {
         document.getElementById("myBarProgress").innerText = preface + " " + pct

@@ -130,45 +130,46 @@ namespace Gathr.Controllers
         {
             string invString = "";
             List<string> invStringList = new List<string>();
-            var inventory = _context.Inventory.ToList();            
+            var inventory = _context.Inventory.ToList();
             List<object> Counts = new List<object>();
             var ids = inventory.Select(x => x.Card_Id).Distinct();
-            foreach(var inv in ids)
+            foreach (var inv in ids)
             {
-                var cnt = new {
+                var cnt = new
+                {
                     id = inv,
                     count = inventory.Where(x => x.Card_Id.Equals(inv)).Count()
                 };
                 Counts.Add(cnt);
             }
 
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=CardCatalog;Trusted_Connection=True;MultipleActiveResultSets=true";
-            string queryString = "SELECT * FROM InventoryString ORDER BY SUBSTRING(CardString,CHARINDEX(' ',CardString),1000)";            
-            using(SqlConnection connection = new SqlConnection(connectionString))
+            string connectionString = _config.GetConnectionString("DefaultConnection");//"Server=(localdb)\\mssqllocaldb;Database=CardCatalog;Trusted_Connection=True;MultipleActiveResultSets=true";
+            string queryString = "SELECT * FROM InventoryString ORDER BY SUBSTRING(CardString,CHARINDEX(' ',CardString),1000)";
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                SqlCommand command = new SqlCommand(queryString, connection);                
+                SqlCommand command = new SqlCommand(queryString, connection);
 
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    invString += reader.GetString(0)+"\n";
+                    invString += reader.GetString(0) + "\n";
                 }
                 reader.Close();
-                
+
             }
-            
-            return invString.Replace("*-*","");
+
+            return invString.Replace("*-*", "");
         }
 
-        public PartialViewResult QueryCard(int Count,string CardName,string Set,string CN,string Mark,string Tags)        
+        public PartialViewResult QueryCard(int Count, string CardName, string Set, string CN, string Mark, string Tags)
         {
             ReturnRequest rReq = new ReturnRequest();
             SearchOptions sOpts = new SearchOptions()
             {
                 card_num = CN,
-                set_code = Set                
+                set_code = Set
             };
             rReq.Initialize(sOpts, _config.GetSection("MaxSingleLoad").Get<int>());
             rReq.sOpt.limit = false;
@@ -179,7 +180,7 @@ namespace Gathr.Controllers
         public PartialViewResult EZSearch(string raw_cards)
         {
             dynamic raw_cards_list = JsonConvert.DeserializeObject(raw_cards);
-            List <EzCard> ezCards = new List<EzCard>();
+            List<EzCard> ezCards = new List<EzCard>();
             foreach (var raw_card_obj in raw_cards_list)
             {
                 EzCard ez = new EzCard()
@@ -257,7 +258,7 @@ namespace Gathr.Controllers
                 skip = 0
             };
             //List<CardView> processedCards = processCards(cards, sOpt);
-            ReturnRequest rReq = new ReturnRequest();            
+            ReturnRequest rReq = new ReturnRequest();
             rReq.Initialize(sOpts, _config.GetSection("MaxSingleLoad").Get<int>());
             rReq.GetCards(_context);
 
@@ -274,7 +275,7 @@ namespace Gathr.Controllers
 
             rReq.Initialize(sOpts, InvByLoc.Count());
             rReq.SetCards(_context, rawCards);
-            
+
             if (sOpts.toggleType.Equals("database"))
             {
                 return PartialView("Page/_CardDetails", rReq);
@@ -475,16 +476,16 @@ namespace Gathr.Controllers
         public string ResetMyInventory()
         {
             //Delete current inventory
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=CardCatalog;Trusted_Connection=True;MultipleActiveResultSets=true";
-            string queryString = "DELETE FROM InventoryV2; DBCC CHECKIDENT ('InventoryV2', RESEED, 0);";            
-            using(SqlConnection connection = new SqlConnection(connectionString))
+            string connectionString = _config.GetConnectionString("DefaultConnection");// "Server=(localdb)\\mssqllocaldb;Database=CardCatalog;Trusted_Connection=True;MultipleActiveResultSets=true";
+            string queryString = "DELETE FROM InventoryV2; DBCC CHECKIDENT ('InventoryV2', RESEED, 0);";
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                SqlCommand command = new SqlCommand(queryString, connection);                
+                SqlCommand command = new SqlCommand(queryString, connection);
 
                 connection.Open();
-                SqlDataReader reader = command.ExecuteReader();                
+                SqlDataReader reader = command.ExecuteReader();
                 reader.Close();
-                
+
             }
             //
             return "Inventory Cleared";
@@ -493,7 +494,8 @@ namespace Gathr.Controllers
         public string UpdateCardsFromSheet(string rows)
         {
             dynamic raw_cards_list = JsonConvert.DeserializeObject(rows);
-            List <SpreadsheetRow> sRows = new List<SpreadsheetRow>();
+            List<InvOptions> newInvs = new List<InvOptions>();
+            List<SpreadsheetRow> sRows = new List<SpreadsheetRow>();
             foreach (var raw_card_obj in raw_cards_list)
             {
                 SpreadsheetRow sRow = new SpreadsheetRow()
@@ -509,40 +511,89 @@ namespace Gathr.Controllers
                     Note = raw_card_obj.Note
                 };
                 sRows.Add(sRow);
-            }            
+            }
 
-            foreach(var row in sRows)
-            {                
-                if (!row.Qty.Equals("") && !row._Set.Equals("") && !row._SetNumber.Equals("")) {                    
-                    var matchedCards = _context.Cards.Where(x => 
-                        x.set.Equals(row._Set.ToLower()) 
-                        && x.collector_number.Equals(row._SetNumber)
-                        && x.lang.Equals(row.Language.ToLower())
-                        ).ToList();
+            foreach (var row in sRows)
+            {
+                if (row.Location.IsNullOrEmpty())
+                {
+                    row.Location = "";
+                }
 
-                    if (matchedCards.Count() > 0) {
-                        Card thisCard = matchedCards.First();
+                if (row.Mark.IsNullOrEmpty())
+                {
+                    row.Mark = "";
+                }
 
-                        //_context.Inventory.Where(x => x.Card_Id.Equals(thisCard.Id)).ToList();
-                        for (int c = 0; c < Int32.Parse(row.Qty); c++)
+                //When true, processes the cards on intake
+                //When false, stashes records in SpreadsheetRow table
+                if (false)
+                {
+                    if (!row.Qty.Equals("") && !row._Set.Equals("") && !row._SetNumber.Equals(""))
+                    {
+                        var matchedCards = _context.Cards.Where(x =>
+                            x.set.Equals(row._Set.ToLower())
+                            && x.collector_number.Equals(row._SetNumber)
+                            && x.lang.Equals(row.Language.ToLower())
+                            ).ToList();
+
+                        if (matchedCards.Count() > 0)
                         {
-                            InvOptions inv = new InvOptions()
-                            {
-                                Card_Id = thisCard.Id,
-                                confirmed_date = DateTime.UtcNow,
-                                Mark = row.Mark,
-                                Language = row.Language,
-                                Location = row.Location,
-                                UpdateUser = "Google",
-                                _confirmed = true,                                
-                            };
+                            //This selects the specific Card object
+                            Card thisCard = matchedCards.First();
 
-                            _context.Inventory.Add(inv);
+                            //Check to see if there are any of this card in the inventory
+                            List<InvOptions> invs = _context.Inventory.Where(x =>
+                                            x.Card_Id.Equals(thisCard.Id)
+                                            && x.Mark.Equals(row.Mark)
+                                            && x.Language.ToLower().Equals(row.Language.ToLower())
+                                            && x.Location.ToLower().Equals(row.Location.ToLower())
+                                            ).ToList();
+
+                            if (invs.Any())
+                            {
+                                //invs gives a total of how many cards are in the inventory
+                                //regardless of other qualifying details such as mark/location.
+                                var newCount = invs.Count();
+                                //if the count of invs with the mark and location is greater 
+                                //than the quantity of the sheet, update X entries
+
+                                //if the count of invs with the mark and location is less
+                                //than the quantity of the sheet, add X entries                            
+
+                                //If the count is the same, no changes - move to next card
+                                Debug.WriteLine("Skipped this record?");
+                            }
+                            else
+                            {
+                                //If this is a fresh import where the table has been emptied, this works
+                                int howMany = Int32.Parse(row.Qty);
+
+                                for (int c = 0; c < howMany; c++)
+                                {
+                                    InvOptions inv = new InvOptions()
+                                    {
+                                        Card_Id = thisCard.Id,
+                                        confirmed_date = DateTime.UtcNow,
+                                        Mark = row.Mark,
+                                        Language = row.Language,
+                                        Location = row.Location,
+                                        UpdateUser = "Google",
+                                        _confirmed = true,
+                                    };
+
+                                    newInvs.Add(inv);
+                                }
+                            }
+
                         }
                     }
+                    _context.Inventory.AddRange(newInvs);
+                } else
+                {
+                    _context.SpreadsheetRows.Add(row);
                 }
-                
-            }
+            }            
             _context.SaveChanges();
 
             return "Complete";

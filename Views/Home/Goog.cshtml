@@ -1,4 +1,5 @@
-﻿@{
+﻿@model GoogleSheetExtractView
+@{
     ViewData["Title"] = "Google Sheets Extract";
 }
 
@@ -14,19 +15,29 @@
             <button class="btn btn-warning" id="import_button" onclick="PostCardsImport()">Clear and Override Inventory</button>
             <button class="btn btn-danger" id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
         </div>
-        <div id="SheetsForm" class="col-12 container-fluid">
+        <div id="SheetsForm" class="col-12 container-fluid g-3">
             <div class="row">
+                <div class="col-12">
+                    <p class="text-white fw-bold">Locate Inventory Range</p>
+                </div>
                 <div class="col">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Spreadsheet Id</span>
-                        <input class="form-control" id="SpreadsheetId" />
+                        <input class="form-control" id="SpreadsheetId" value="@Model.SpreadsheetId" />
                     </div>
                 </div>
                 <div class="col">
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text">Oracle</span>
-                        <input class="form-control" id="SpreadsheetRange" />
+                        <span class="input-group-text">Range</span>
+                        <input class="form-control" id="SpreadsheetRange" value="@Model.SheetRange" />
                     </div>
+                </div>
+            </div>
+            <div class="row pt-2 g-2">
+                <div class="col-11 text-right">
+                </div>
+                <div class="col-1 text-right">
+                    <button onclick="CheckSpreadsheet()" class="btn btn-success w-100">Check</button>
                 </div>
             </div>
         </div>
@@ -35,7 +46,7 @@
 
 <div id="LoadingBar" class="w-100 collapse pt-4 pb-2">
     <div class="w3-border">
-        <div id="myBar" class="rounded movingLoadingBar" style="width: 100%;">
+        <div id="myBar" class="rounded movingLoadingBar" style="width: 100%; max-height:30px">
             <p class="text-center fw-bold" style="text-shadow:1px 1px 0 #444" id="myBarProgress">100%</p>
         </div>
     </div>
@@ -44,28 +55,32 @@
 <div id="SampleExtract" class="collapse container">
     <div class="row">
         <h4 class="col-12">Sample Data Pull</h4>
-        <div class="col-6">
+        <div class="col-12">
             <p class="small">
                 Please ensure that the columns of the imported sheet are in the following order:
             </p>
         </div>
-        <div class="col-6">
-            <ol>
-                <li>Qty</li>
-                <li>Set</li>
-                <li>Number</li>
-                <li>Mark</li>
-                <li>Language</li>
-                <li>Name</li>
-                <li>Type</li>
-                <li>Rarity</li>
-                <li>Confirmed</li>
-                <li>Location</li>
-                <li>Type 1</li>
-                <li>Type 2</li>
-                <li>Type 3</li>
-                <li>Note</li>
-            </ol>
+        <div class="col-12">
+            <table class="table text-white">
+                <tbody>
+                    <tr>
+                        <td>Qty</td>
+                        <td>Set</td>
+                        <td>Number</td>
+                        <td>Mark</td>
+                        <td>Language</td>
+                        <td>Name</td>
+                        <td>Type</td>
+                        <td>Rarity</td>
+                        <td>Confirmed</td>
+                        <td>Location</td>
+                        <td>Type 1</td>
+                        <td>Type 2</td>
+                        <td>Type 3</td>
+                        <td>Note</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <pre id="content" style="white-space: pre-wrap;"></pre>
     </div>

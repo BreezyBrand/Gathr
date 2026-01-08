@@ -30,8 +30,73 @@ namespace Gathr.Controllers
 
         public IActionResult Goog()
         {
-            
-            return View();
+            var ss = _context.UserSettings.Where(x => x.Option.Equals("DefaultGoogleSpreadsheet")).ToList();
+            var range = _context.UserSettings.Where(x => x.Option.Equals("DefaultGoogleRange")).ToList();
+
+            string ssID;
+            string rng;
+
+            if (ss.Any())
+            {
+                ssID = ss.First().Value;
+            }
+            else
+            {
+                ssID = "";
+            }
+
+            if (range.Any())
+            {
+                rng = range.First().Value;
+            }
+            else
+            {
+                rng = "";
+            }
+
+            GoogleSheetExtractView view = new GoogleSheetExtractView()
+            {
+                SpreadsheetId = ssID,
+                SheetRange = rng
+            };
+
+            return View(view);
+        }
+
+        public string UpdateUserSettings(string DefaultGoogleSpreadsheet, string DefaultGoogleRange)
+        {
+            var ss = _context.UserSettings.Where(x => x.Option.Equals("DefaultGoogleSpreadsheet")).ToList();
+            var range = _context.UserSettings.Where(x => x.Option.Equals("DefaultGoogleRange")).ToList();
+            if (ss.Any())
+            {
+                ss.First().Value = DefaultGoogleSpreadsheet;
+                _context.UserSettings.Update(ss.First());
+            }
+            else
+            {
+                UserSettings newSS = new()
+                {
+                    Option = "DefaultGoogleSpreadsheet",
+                    Value = DefaultGoogleSpreadsheet
+                };
+                _context.UserSettings.Add(newSS);
+            }
+            if (range.Any())
+            {
+                range.First().Value = DefaultGoogleRange;
+                _context.UserSettings.Update(range.First());
+            }
+            else
+            {
+                UserSettings newRng = new()
+                {
+                    Option = "DefaultGoogleRange",
+                    Value = DefaultGoogleRange
+                };
+                _context.UserSettings.Add(newRng);
+            }
+            _context.SaveChanges();
+            return "Updated";
         }
 
         public IActionResult RestoreImages()

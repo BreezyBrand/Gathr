@@ -100,6 +100,29 @@ CREATE TABLE [dbo].[Images] (
 
 GO;
 
+CREATE TABLE [dbo].[SpreadsheetRow](
+    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	[Qty] NVARCHAR(MAX) NULL,
+    [_Set] NVARCHAR(MAX) NULL,
+    [_SetNumber] NVARCHAR(MAX) NULL,
+    [Mark] NVARCHAR(MAX) NULL,
+    [Language] NVARCHAR(MAX) NULL,
+    [Name] NVARCHAR(MAX) NULL,
+    [Type] NVARCHAR(MAX) NULL,
+    [Rarity] NVARCHAR(MAX) NULL,
+    [Confirmed] NVARCHAR(MAX) NULL,
+    [Location] NVARCHAR(MAX) NULL,
+    [Type1] NVARCHAR(MAX) NULL,
+    [Type2] NVARCHAR(MAX) NULL,
+    [Type3] NVARCHAR(MAX) NULL,
+    [Note] NVARCHAR(MAX) NULL,
+PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+
+GO;
+
 CREATE VIEW [dbo].[SpreadsheetView]
 	AS 
 	SELECT 

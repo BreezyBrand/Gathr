@@ -1,6 +1,7 @@
 using Gathr.Data;
 using Gathr.Models;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Configuration;
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'localDB' not found.")));
 
-
+builder.Services.Configure<FormOptions>(x => x.ValueCountLimit = int.MaxValue);
 
 var app = builder.Build();
 

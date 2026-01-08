@@ -18,5 +18,7 @@ namespace Gathr.Data
         public DbSet<CardLocation> Locations { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<InvTag> InvTags { get; set; }
+        public DbSet<UserSettings> UserSettings { get; set; }
+        public DbSet<SpreadsheetRow> SpreadsheetRows { get; set; }
     }
 }
